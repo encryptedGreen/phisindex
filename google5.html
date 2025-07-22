@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in - Google Accounts</title>
+    <style>
+        :root {
+            --google-blue: #1a73e8;
+            --google-red: #d93025;
+            --google-yellow: #f4b400;
+            --google-green: #0f9d58;
+            --google-gray: #5f6368;
+            --google-light-gray: #f8f9fa;
+            --google-border: #dadce0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+        }
+
+        body {
+            background-color: white;
+            color: #202124;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.5;
+        }
+
+        /* Modern Header */
+        .header {
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--google-border);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .google-logo {
+            font-size: 20px;
+            font-weight: 500;
+            letter-spacing: -0.5px;
+        }
+
+        .google-logo span:nth-child(1) { color: var(--google-blue); }
+        .google-logo span:nth-child(2) { color: var(--google-red); }
+        .google-logo span:nth-child(3) { color: var(--google-yellow); }
+        .google-logo span:nth-child(4) { color: var(--google-blue); }
+        .google-logo span:nth-child(5) { color: var(--google-green); }
+        .google-logo span:nth-child(6) { color: var(--google-red); }
+
+        .header-actions {
+            display: flex;
+            gap: 24px;
+        }
+
+        .header-link {
+            color: var(--google-blue);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+
+        .header-link:hover {
+            color: #174ea6;
+            text-decoration: underline;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 24px;
+            width: 100%;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 450px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Sign-in Card */
+        .signin-card {
+            width: 100%;
+            border: 1px solid var(--google-border);
+            border-radius: 12px;
+            padding: 48px 40px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            background: white;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .signin-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+        }
+
+        .signin-header {
+            text-align: center;
+            margin-bottom: 36px;
+        }
+
+        .signin-header h1 {
+            font-size: 24px;
+            font-weight: 500;
+            color: #202124;
+            margin-bottom: 12px;
+        }
+
+        .signin-header p {
+            color: var(--google-gray);
+            font-size: 16px;
+        }
+
+        /* Form Elements */
+        .form-group {
+            position: relative;
+            margin-bottom: 24px;
+            width: 100%;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 16px;
+            border: 1px solid var(--google-border);
+            border-radius: 6px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus {
+            border: 2px solid var(--google-blue);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+        }
+
+        .input-label {
+            position: absolute;
+            left: 16px;
+            top: 16px;
+            color: var(--google-gray);
+            font-size: 16px;
+            transition: all 0.3s;
+            pointer-events: none;
+            background-color: white;
+            padding: 0 8px;
+        }
+
+        .form-input:focus + .input-label,
+        .form-input:not(:placeholder-shown) + .input-label {
+            top: -10px;
+            font-size: 13px;
+            color: var(--google-blue);
+            transform: translateY(0);
+        }
+
+        .forgot-email {
+            margin-bottom: 36px;
+        }
+
+        .forgot-link {
+            color: var(--google-blue);
+            font-weight: 500;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+
+        .forgot-link:hover {
+            color: #174ea6;
+            text-decoration: underline;
+        }
+
+        /* Action Buttons */
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 40px;
+        }
+
+        .create-account {
+            color: var(--google-blue);
+            font-weight: 500;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+
+        .create-account:hover {
+            color: #174ea6;
+            text-decoration: underline;
+        }
+
+        .next-button {
+            background-color: var(--google-blue);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 24px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            min-width: 100px;
+        }
+
+        .next-button:hover {
+            background-color: #174ea6;
+            box-shadow: 0 2px 4px rgba(26, 115, 232, 0.3);
+        }
+
+        /* Footer */
+        .footer {
+            background-color: var(--google-light-gray);
+            padding: 24px;
+            width: 100%;
+            border-top: 1px solid var(--google-border);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: var(--google-gray);
+            gap: 16px;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .footer-link {
+            color: var(--google-gray);
+            text-decoration: none;
+            transition: color 0.2s;
+            white-space: nowrap;
+        }
+
+        .footer-link:hover {
+            color: var(--google-blue);
+            text-decoration: underline;
+        }
+
+        .language-selector {
+            display: flex;
+            align-items: center;
+        }
+
+        .language-selector select {
+            border: 1px solid var(--google-border);
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-size: 12px;
+            color: var(--google-gray);
+            background-color: white;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .language-selector select:hover {
+            border-color: var(--google-blue);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header {
+                padding: 16px;
+            }
+            
+            .header-actions {
+                gap: 16px;
+            }
+            
+            .signin-card {
+                padding: 36px 24px;
+                border-radius: 8px;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            
+            .footer-links {
+                gap: 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .signin-card {
+                padding: 32px 20px;
+                border: none;
+                box-shadow: none;
+            }
+            
+            .signin-card:hover {
+                transform: none;
+                box-shadow: none;
+            }
+            
+            .actions {
+                flex-direction: column-reverse;
+                align-items: flex-start;
+                gap: 16px;
+            }
+            
+            .next-button {
+                width: 100%;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 12px;
+                padding: 12px;
+            }
+            
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo-container">
+            <div class="google-logo">
+                <span>G</span><span>o</span><span>o</span><span>g</span><span>l</span><span>e</span>
+            </div>
+        </div>
+        <div class="header-actions">
+            <a href="https://support.google.com" class="header-link" target="_blank">Help</a>
+            <a href="https://policies.google.com/privacy" class="header-link" target="_blank">Privacy</a>
+            <a href="https://policies.google.com/terms" class="header-link" target="_blank">Terms</a>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div class="auth-container">
+            <div class="signin-card">
+                <div class="signin-header">
+                    <h1>Welcome back</h1>
+                    <p>Sign in to access your Google Account</p>
+                </div>
+                
+                <form>
+                    <div class="form-group">
+                        <input type="email" id="email" class="form-input" placeholder=" " required>
+                        <label for="email" class="input-label">Email or phone</label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <input type="password" id="password" class="form-input" placeholder=" " required>
+                        <label for="password" class="input-label">Enter your password</label>
+                    </div>
+                    
+                    <div class="forgot-email">
+                        <a href="https://accounts.google.com/signin/recovery" class="forgot-link" target="_blank">Forgot email?</a>
+                    </div>
+                    
+                    <div class="actions">
+                        <a href="https://accounts.google.com/signup" class="create-account" target="_blank">Create account</a>
+                        <button type="submit" class="next-button">Next</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="https://about.google" class="footer-link" target="_blank">About Google</a>
+                <a href="https://policies.google.com/privacy" class="footer-link" target="_blank">Privacy</a>
+                <a href="https://policies.google.com/terms" class="footer-link" target="_blank">Terms</a>
+                <a href="https://support.google.com" class="footer-link" target="_blank">Help</a>
+                <a href="https://policies.google.com/technologies/cookies" class="footer-link" target="_blank">Cookies</a>
+            </div>
+            <div class="language-selector">
+                <select>
+                    <option>English (United States)</option>
+                    <option>Español (España)</option>
+                    <option>Français (France)</option>
+                    <option>Deutsch</option>
+                    <option>日本語</option>
+                    <option>中文 (简体)</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simple form validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                alert('Please enter both email and password');
+                return;
+            }
+            
+            // In a real implementation, this would be an actual authentication call
+            console.log('Sign in attempt with:', email);
+        });
+    </script>
+</body>
+</html>

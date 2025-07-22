@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatroom</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.3/socket.io.js"></script>
+    <style>
+        /* Your original styles preserved exactly */
+        .chat-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .messages {
+            height: 500px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .input-box {
+            display: flex;
+            gap: 10px;
+        }
+        .input-box input {
+            flex-grow: 1;
+            padding: 8px;
+        }
+        .message {
+            margin-bottom: 15px;
+        }
+        .profile-circle {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #4a5568;
+            color: white;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 10px;
+        }
+        .message img {
+            max-width: 100%;
+            max-height: 300px;
+            display: block;
+            margin-top: 5px;
+        }
+        .message audio {
+            width: 100%;
+            margin-top: 5px;
+        }
+        .action-button {
+            background: #4a5568;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+        .file-input {
+            display: none;
+        }
+        .recording {
+            background-color: #e53e3e !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="messages" id="messages"></div>
+        <div class="input-box">
+            <button id="fileButton" class="action-button">📁</button>
+            <input type="file" id="fileInput" class="file-input" accept="image/*,audio/*">
+            <button id="micButton" class="action-button">🎤</button>
+            <input type="text" id="message" placeholder="Type your message...">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+        const username = "{{ username }}";
+        let mediaRecorder;
+        let audioChunks = [];
+
+        // File upload
+        document.getElementById('fileButton').addEventListener('click', () => {
+            document.getElementById('fileInput').click();
+        });
+
+        document.getElementById('fileInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = () => {
+                const fileType = file.type.startsWith('image/') ? 'image' : 'audio';
+                fetch('/upload_image', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        image: reader.result,
+                        type: fileType,
+                        username: username
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        socket.emit('message', {
+                            username: username,
+                            url: data.url,
+                            type: data.type
+                        });
+                    }
+                });
+            };
+            
+            if (file.type.startsWith('image/')) {
+                reader.readAsDataURL(file);
+            } else if (file.type.startsWith('audio/')) {
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Fixed audio recording
+        document.getElementById('micButton').addEventListener('mousedown', async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true
+                    } 
+                });
+                mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+                audioChunks = [];
+                document.getElementById('micButton').classList.add('recording');
+                
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data.size > 0) {
+                        audioChunks.push(e.data);
+                    }
+                };
+                
+                mediaRecorder.start(100); // Collect data every 100ms
+            } catch (err) {
+                console.error("Error accessing microphone:", err);
+            }
+        });
+
+        document.getElementById('micButton').addEventListener('mouseup', () => {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+                document.getElementById('micButton').classList.remove('recording');
+                
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        fetch('/upload_image', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                image: reader.result,
+                                type: 'audio',
+                                username: username
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === 'success') {
+                                socket.emit('message', {
+                                    username: username,
+                                    url: data.url,
+                                    type: 'audio'
+                                });
+                            }
+                        });
+                    };
+                    reader.readAsDataURL(audioBlob);
+                    
+                    // Stop all tracks
+                    mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                };
+            }
+        });
+
+        // Message handling
+        socket.on('message', (data) => {
+            const messagesDiv = document.getElementById("messages");
+            const msgElement = document.createElement("div");
+            msgElement.className = "message";
+            
+            const userIcon = document.createElement("span");
+            userIcon.className = "profile-circle";
+            userIcon.textContent = data.username[0].toUpperCase();
+            
+            const content = document.createElement("span");
+            content.innerHTML = `<strong>${data.username}:</strong> `;
+            
+            if (data.type === 'text') {
+                content.innerHTML += data.message;
+            } else if (data.type === 'image') {
+                content.innerHTML += `<br><img src="${data.url}">`;
+            } else if (data.type === 'audio') {
+                content.innerHTML += `<br><audio controls src="${data.url}"></audio>`;
+            }
+            
+            msgElement.appendChild(userIcon);
+            msgElement.appendChild(content);
+            messagesDiv.appendChild(msgElement);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        });
+
+        function sendMessage() {
+            const input = document.getElementById("message");
+            const message = input.value.trim();
+            if (message) {
+                socket.emit('message', {
+                    username: username,
+                    message: message,
+                    type: 'text'
+                });
+                input.value = "";
+            }
+        }
+
+        // Enter key to send
+        document.getElementById('message').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    </script>
+</body>
+</html>

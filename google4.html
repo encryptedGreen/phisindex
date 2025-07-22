@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in - Google Accounts</title>
+    <style>
+        :root {
+            --google-blue: #4285F4;
+            --google-red: #EA4335;
+            --google-yellow: #FBBC05;
+            --google-green: #34A853;
+            --google-gray: #5F6368;
+            --google-light-gray: #F1F3F4;
+            --google-border: #DADCE0;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+        }
+        
+        body {
+            background-color: white;
+            color: #202124;
+            font-size: 14px;
+            line-height: 1.4286;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            padding: 16px 24px;
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 24px;
+        }
+        
+        .header-actions a {
+            color: var(--google-blue);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            margin-bottom: 120px;
+        }
+        
+        .google-logo {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .google-logo span {
+            font-size: 22px;
+            font-weight: 500;
+            margin-left: 8px;
+            color: var(--google-gray);
+            align-self: flex-end;
+        }
+        
+        .signin-container {
+            width: 100%;
+            max-width: 448px;
+            padding: 40px 40px 36px;
+            border: 1px solid var(--google-border);
+            border-radius: 8px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .signin-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        
+        .signin-header h1 {
+            font-size: 24px;
+            font-weight: 400;
+            color: #202124;
+            margin-bottom: 8px;
+        }
+        
+        .signin-header p {
+            color: var(--google-gray);
+            font-size: 16px;
+        }
+        
+        .form-group {
+            position: relative;
+            margin-bottom: 24px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 13px 15px;
+            border: 1px solid var(--google-border);
+            border-radius: 4px;
+            font-size: 16px;
+            height: 56px;
+            transition: all 0.2s;
+        }
+        
+        .form-group input:focus {
+            border: 2px solid var(--google-blue);
+            outline: none;
+            box-shadow: 0 0 0 2px #E8F0FE;
+        }
+        
+        .form-group label {
+            position: absolute;
+            left: 13px;
+            top: 18px;
+            color: var(--google-gray);
+            font-size: 16px;
+            transition: all 0.2s;
+            pointer-events: none;
+            background-color: white;
+            padding: 0 4px;
+        }
+        
+        .form-group input:focus + label,
+        .form-group input:not(:placeholder-shown) + label {
+            top: -8px;
+            left: 8px;
+            font-size: 12px;
+            color: var(--google-blue);
+        }
+        
+        .forgot-email {
+            margin-bottom: 40px;
+        }
+        
+        .forgot-email a {
+            color: var(--google-blue);
+            font-weight: 500;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .forgot-email a:hover {
+            text-decoration: underline;
+        }
+        
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .create-account {
+            color: var(--google-blue);
+            font-weight: 500;
+            text-decoration: none;
+            padding: 8px 0;
+        }
+        
+        .next-button {
+            background-color: var(--google-blue);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 24px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .next-button:hover {
+            background-color: #3367D6;
+            box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+        }
+        
+        .footer {
+            background-color: var(--google-light-gray);
+            padding: 24px 0;
+            width: 100%;
+        }
+        
+        .footer-content {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .footer-left {
+            display: flex;
+            gap: 24px;
+        }
+        
+        .footer-left a {
+            color: var(--google-gray);
+            text-decoration: none;
+            font-size: 11px;
+        }
+        
+        .footer-left a:hover {
+            text-decoration: underline;
+        }
+        
+        .footer-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .footer-right select {
+            border: 1px solid var(--google-border);
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 11px;
+            color: var(--google-gray);
+            background-color: white;
+        }
+        
+        @media (max-width: 600px) {
+            .signin-container {
+                border: none;
+                box-shadow: none;
+                padding: 0 16px;
+            }
+            
+            .header {
+                justify-content: center;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                gap: 16px;
+            }
+            
+            .footer-left, .footer-right {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-actions">
+            <a href="#">Help</a>
+            <a href="#">Privacy</a>
+            <a href="#">Terms</a>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div class="google-logo">
+            <svg width="75" height="24" viewBox="0 0 75 24" fill="none">
+                <path d="M9.24 8.19V12.97H14.76C14.5 14.25 13.3 16.97 9.24 16.97C5.28 16.97 2.01 13.69 2.01 9.59C2.01 5.49 5.28 2.2 9.24 2.2C11.28 2.2 12.81 3.15 13.78 4.11L16.69 1.25C14.9 -0.45 12.3 -1.25 9.24 -1.25C4.2 -1.25 -0.01 3.54 -0.01 9.59C-0.01 15.64 4.2 20.44 9.24 20.44C14.76 20.44 18.33 16.29 18.33 10.45C18.33 9.79 18.28 9.14 18.13 8.19H9.24Z" fill="#EA4335"/>
+                <path d="M25.27 16.97C21.26 16.97 18.07 13.69 18.07 9.59C18.07 5.49 21.26 2.2 25.27 2.2C29.28 2.2 32.47 5.49 32.47 9.59C32.47 13.69 29.28 16.97 25.27 16.97ZM25.27 0C19.76 0 15.3 4.48 15.3 9.59C15.3 14.7 19.76 19.17 25.27 19.17C30.78 19.17 35.24 14.7 35.24 9.59C35.24 4.48 30.78 0 25.27 0Z" fill="#FBBC05"/>
+                <path d="M45.84 16.97C41.83 16.97 38.64 13.69 38.64 9.59C38.64 5.49 41.83 2.2 45.84 2.2C49.85 2.2 53.04 5.49 53.04 9.59C53.04 13.69 49.85 16.97 45.84 16.97ZM45.84 0C40.33 0 35.87 4.48 35.87 9.59C35.87 14.7 40.33 19.17 45.84 19.17C51.35 19.17 55.81 14.7 55.81 9.59C55.81 4.48 51.35 0 45.84 0Z" fill="#4285F4"/>
+                <path d="M64.37 14.34L67.28 11.5C66.31 10.55 64.81 9.59 62.79 9.59C58.78 9.59 55.61 12.86 55.61 16.97C55.61 21.07 58.78 24.35 62.79 24.35C66.8 24.35 69.97 21.07 69.97 16.97V8.19H64.37V14.34Z" fill="#34A853"/>
+            </svg>
+            <span>Account</span>
+        </div>
+        
+        <div class="signin-container">
+            <div class="signin-header">
+                <h1>Welcome</h1>
+                <p>Sign in with your Google Account</p>
+            </div>
+            
+            <form>
+                <div class="form-group">
+                    <input type="email" id="email" placeholder=" " required>
+                    <label for="email">Email or phone</label>
+                </div>
+                
+                <div class="forgot-email">
+                    <a href="#">Forgot email?</a>
+                </div>
+                
+                <div class="form-group">
+                    <input type="password" id="password" placeholder=" " required>
+                    <label for="password">Enter your password</label>
+                </div>
+                
+                <div class="button-group">
+                    <a href="#" class="create-account">Create account</a>
+                    <button type="submit" class="next-button">Next</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <div class="footer-content">
+            <div class="footer-left">
+                <a href="#">About Google</a>
+                <a href="#">Privacy</a>
+                <a href="#">Terms</a>
+            </div>
+            <div class="footer-right">
+                <select>
+                    <option>English (United States)</option>
+                    <option>Español</option>
+                    <option>Français</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

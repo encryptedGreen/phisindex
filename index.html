@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>reCAPTCHA</title>
+    <style>
+        body {
+            font-family: Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .captcha-container {
+            width: 300px;
+            background: white;
+            border: 1px solid #d3d3d3;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .captcha-step1 {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .captcha-step1:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .captcha-step1.verified {
+            background-color: #f8f9fa;
+            cursor: default;
+        }
+        
+        .checkbox-section {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+        
+        .checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #757575;
+            border-radius: 3px;
+            margin-right: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .checkbox.loading {
+            border: 2px solid #f1f1f1;
+            border-top: 2px solid #1a73e8;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        .checkbox.checked {
+            background: #1a73e8;
+            border-color: #1a73e8;
+        }
+        
+        .checkbox-tick {
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            display: none;
+        }
+        
+        .checkbox.checked .checkbox-tick {
+            display: block;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .checkbox-text {
+            font-size: 14px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .recaptcha-logo {
+            width: 32px;
+            height: 32px;
+            opacity: 0.8;
+        }
+        
+        .recaptcha-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .captcha-footer {
+            padding: 12px 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 10px;
+            color: #777;
+        }
+        
+        .captcha-privacy a {
+            color: #1a73e8;
+            text-decoration: none;
+        }
+        
+        .captcha-brand {
+            font-size: 10px;
+            color: #777;
+        }
+        
+        /* Popup Overlay */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        
+        .popup-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .popup-content {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            width: 400px;
+            max-width: 90vw;
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+        
+        .popup-overlay.show .popup-content {
+            transform: scale(1);
+        }
+        
+        .popup-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #1a73e8;
+            color: white;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .popup-title {
+            font-size: 16px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+        }
+        
+        .popup-title svg {
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+            fill: white;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: white;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.3s ease;
+        }
+        
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .popup-body {
+            padding: 20px;
+        }
+        
+        .webcam-container {
+            width: 100%;
+            height: 240px;
+            background-color: #000;
+            border: 2px solid #d3d3d3;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #webcam {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .face-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #f44336;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .face-indicator.detected {
+            background: #4caf50;
+        }
+        
+        .face-outline {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 160px;
+            height: 200px;
+            border: 2px dashed rgba(255, 255, 255, 0.5);
+            border-radius: 80px;
+            pointer-events: none;
+        }
+        
+        .face-outline.detected {
+            border-color: #4caf50;
+            border-style: solid;
+        }
+        
+        .status-text {
+            font-size: 14px;
+            margin: 10px 0;
+            min-height: 20px;
+            color: #666;
+            text-align: center;
+        }
+        
+        .status-text.success {
+            color: #4caf50;
+        }
+        
+        .status-text.error {
+            color: #f44336;
+        }
+        
+        .verify-btn {
+            width: 100%;
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .verify-btn:hover:not(:disabled) {
+            background-color: #1557b0;
+        }
+        
+        .verify-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .verify-btn.success {
+            background-color: #4caf50;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="captcha-container">
+        <div class="captcha-step1" id="captcha-step1">
+            <div class="checkbox-section">
+                <div class="checkbox" id="checkbox">
+                    <span class="checkbox-tick">✓</span>
+                </div>
+                <div class="checkbox-text">I'm not a robot</div>
+            </div>
+            <div class="recaptcha-logo">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/RecaptchaLogo.svg/1200px-RecaptchaLogo.svg.png" alt="reCAPTCHA">
+            </div>
+        </div>
+        
+        <div class="captcha-footer">
+            <div class="captcha-privacy">
+                <a href="#">Privacy</a> - <a href="#">Terms</a>
+            </div>
+            <div class="captcha-brand">reCAPTCHA</div>
+        </div>
+    </div>
+
+    <!-- Popup for face verification -->
+    <div class="popup-overlay" id="popup-overlay">
+        <div class="popup-content">
+            <div class="popup-header">
+                <div class="popup-title">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+                    </svg>
+                    Verify you are human
+                </div>
+                <button class="close-btn" id="close-btn">&times;</button>
+            </div>
+            <div class="popup-body">
+                <div class="webcam-container">
+                    <video id="webcam" autoplay playsinline muted></video>
+                    <canvas id="canvas"></canvas>
+                    <div class="face-outline" id="face-outline"></div>
+                    <div class="face-indicator" id="face-indicator"></div>
+                </div>
+                
+                <div id="status" class="status-text">Position your face within the oval outline</div>
+                
+                <button id="verify-btn" class="verify-btn" disabled>VERIFY</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM elements
+        const captchaStep1 = document.getElementById('captcha-step1');
+        const checkbox = document.getElementById('checkbox');
+        const popupOverlay = document.getElementById('popup-overlay');
+        const closeBtn = document.getElementById('close-btn');
+        const video = document.getElementById('webcam');
+        const canvas = document.getElementById('canvas');
+        const verifyBtn = document.getElementById('verify-btn');
+        const statusEl = document.getElementById('status');
+        const faceIndicator = document.getElementById('face-indicator');
+        const faceOutline = document.getElementById('face-outline');
+        
+        // Detection variables
+        let isFullFaceDetected = false;
+        let stream = null;
+        let detectionInterval = null;
+        let ctx = null;
+        let captchaCompleted = false;
+        
+        // Initialize face detection with improved full face detection
+        async function initializeCamera() {
+            try {
+                statusEl.textContent = "Initializing camera...";
+                
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        width: { ideal: 640 },
+                        height: { ideal: 480 },
+                        facingMode: "user"
+                    },
+                    audio: false
+                });
+                
+                video.srcObject = stream;
+                
+                await new Promise((resolve) => {
+                    video.onloadedmetadata = () => {
+                        // Set canvas size to match video
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+                        ctx = canvas.getContext('2d');
+                        resolve();
+                    };
+                });
+                
+                statusEl.textContent = "Position your face within the oval outline";
+                verifyBtn.disabled = false;
+                
+                startAdvancedFaceDetection();
+                
+            } catch (err) {
+                console.error('Camera access error:', err);
+                statusEl.textContent = "Camera access denied. Please allow camera access.";
+                statusEl.className = "status-text error";
+                
+                // Mark as failed
+                failCaptcha();
+            }
+        }
+        
+        // Advanced face detection requiring full face
+        function startAdvancedFaceDetection() {
+            detectionInterval = setInterval(() => {
+                if (video.readyState === 4) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    
+                    // Define face detection region (oval area)
+                    const centerX = canvas.width / 2;
+                    const centerY = canvas.height / 2;
+                    const faceWidth = 160;
+                    const faceHeight = 200;
+                    
+                    // Sample multiple regions for full face detection
+                    const regions = [
+                        // Forehead
+                        { x: centerX - faceWidth/4, y: centerY - faceHeight/2.5, w: faceWidth/2, h: faceHeight/8 },
+                        // Eyes area
+                        { x: centerX - faceWidth/2.5, y: centerY - faceHeight/6, w: faceWidth/1.2, h: faceHeight/8 },
+                        // Nose area
+                        { x: centerX - faceWidth/6, y: centerY - faceHeight/12, w: faceWidth/3, h: faceHeight/6 },
+                        // Mouth area
+                        { x: centerX - faceWidth/4, y: centerY + faceHeight/8, w: faceWidth/2, h: faceHeight/8 },
+                        // Chin area
+                        { x: centerX - faceWidth/6, y: centerY + faceHeight/4, w: faceWidth/3, h: faceHeight/8 }
+                    ];
+                    
+                    let detectedRegions = 0;
+                    let totalBrightness = 0;
+                    let totalVariance = 0;
+                    
+                    regions.forEach(region => {
+                        const imageData = ctx.getImageData(region.x, region.y, region.w, region.h);
+                        const analysis = analyzeRegion(imageData);
+                        
+                        // Check if this region contains face-like features
+                        if (analysis.brightness > 60 && analysis.brightness < 220 && 
+                            analysis.variance > 400 && analysis.skinTone) {
+                            detectedRegions++;
+                        }
+                        
+                        totalBrightness += analysis.brightness;
+                        totalVariance += analysis.variance;
+                    });
+                    
+                    // Require at least 4 out of 5 regions to be detected for full face
+                    const avgBrightness = totalBrightness / regions.length;
+                    const avgVariance = totalVariance / regions.length;
+                    
+                    if (detectedRegions >= 4 && avgBrightness > 80 && avgBrightness < 200 && avgVariance > 500) {
+                        isFullFaceDetected = true;
+                        faceIndicator.classList.add('detected');
+                        faceOutline.classList.add('detected');
+                        statusEl.textContent = "Full face detected! Click verify";
+                        statusEl.className = "status-text success";
+                        
+                        // Draw detection indicator
+                        ctx.strokeStyle = '#4caf50';
+                        ctx.lineWidth = 3;
+                        ctx.beginPath();
+                        ctx.ellipse(centerX, centerY, faceWidth/2, faceHeight/2, 0, 0, 2 * Math.PI);
+                        ctx.stroke();
+                        
+                    } else {
+                        isFullFaceDetected = false;
+                        faceIndicator.classList.remove('detected');
+                        faceOutline.classList.remove('detected');
+                        
+                        if (detectedRegions > 0 && detectedRegions < 4) {
+                            statusEl.textContent = "Show your full face within the outline";
+                            statusEl.className = "status-text error";
+                        } else {
+                            statusEl.textContent = "Position your face within the oval outline";
+                            statusEl.className = "status-text";
+                        }
+                    }
+                }
+            }, 300);
+        }
+        
+        // Analyze image region for face-like features
+        function analyzeRegion(imageData) {
+            let totalBrightness = 0;
+            let rTotal = 0, gTotal = 0, bTotal = 0;
+            let pixelCount = 0;
+            
+            for (let i = 0; i < imageData.data.length; i += 4) {
+                const r = imageData.data[i];
+                const g = imageData.data[i + 1];
+                const b = imageData.data[i + 2];
+                
+                const brightness = (r + g + b) / 3;
+                totalBrightness += brightness;
+                rTotal += r;
+                gTotal += g;
+                bTotal += b;
+                pixelCount++;
+            }
+            
+            const avgBrightness = totalBrightness / pixelCount;
+            const avgR = rTotal / pixelCount;
+            const avgG = gTotal / pixelCount;
+            const avgB = bTotal / pixelCount;
+            
+            // Calculate variance
+            let variance = 0;
+            for (let i = 0; i < imageData.data.length; i += 4) {
+                const r = imageData.data[i];
+                const g = imageData.data[i + 1];
+                const b = imageData.data[i + 2];
+                const brightness = (r + g + b) / 3;
+                variance += Math.pow(brightness - avgBrightness, 2);
+            }
+            variance = variance / pixelCount;
+            
+            // Check for skin tone (simplified)
+            const skinTone = (avgR > avgG && avgR > avgB && avgR > 95) || 
+                           (avgR > 80 && avgG > 60 && avgB > 40);
+            
+            return {
+                brightness: avgBrightness,
+                variance: variance,
+                skinTone: skinTone
+            };
+        }
+        
+        // Complete captcha successfully
+        function completeCaptcha() {
+            captchaCompleted = true;
+            checkbox.classList.remove('loading');
+            checkbox.classList.add('checked');
+            captchaStep1.classList.add('verified');
+            captchaStep1.style.pointerEvents = 'auto';
+            
+            document.cookie = "human_verified=true; path=/; max-age=3600";
+        }
+        
+        // Fail captcha
+        function failCaptcha() {
+            captchaCompleted = true;
+            checkbox.classList.remove('loading');
+            captchaStep1.style.pointerEvents = 'auto';
+            
+            // Add visual indication of failure
+            checkbox.style.borderColor = '#f44336';
+            checkbox.style.backgroundColor = '#ffebee';
+            
+            setTimeout(() => {
+                // Reset for retry
+                checkbox.style.borderColor = '#757575';
+                checkbox.style.backgroundColor = 'white';
+                captchaCompleted = false;
+            }, 3000);
+        }
+        
+        // Step 1: Checkbox click handler
+        captchaStep1.addEventListener('click', async () => {
+            if (checkbox.classList.contains('checked') || captchaCompleted) return;
+            
+            captchaStep1.style.pointerEvents = 'none';
+            checkbox.classList.add('loading');
+            
+            // Show popup immediately for verification
+            popupOverlay.classList.add('show');
+            await initializeCamera();
+        });
+        
+        // Close popup
+        closeBtn.addEventListener('click', () => {
+            popupOverlay.classList.remove('show');
+            cleanup();
+            
+            // If not completed, mark as failed
+            if (!captchaCompleted) {
+                failCaptcha();
+            }
+        });
+        
+        // Verify button click handler
+        verifyBtn.addEventListener('click', async () => {
+            if (!isFullFaceDetected) {
+                statusEl.textContent = "Please show your full face within the outline";
+                statusEl.className = "status-text error";
+                return;
+            }
+            
+            verifyBtn.disabled = true;
+            statusEl.textContent = "Verifying...";
+            statusEl.className = "status-text";
+            
+            if (detectionInterval) {
+                clearInterval(detectionInterval);
+            }
+            
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            // Simulate verification success/failure (90% success rate)
+            const success = Math.random() > 0.1;
+            
+            if (success) {
+                statusEl.textContent = "Verification complete! You are human.";
+                statusEl.className = "status-text success";
+                
+                verifyBtn.textContent = "✓ VERIFIED";
+                verifyBtn.classList.add('success');
+                
+                completeCaptcha();
+                
+                setTimeout(() => {
+                    popupOverlay.classList.remove('show');
+                    cleanup();
+                }, 2000);
+            } else {
+                statusEl.textContent = "Verification failed. Please try again.";
+                statusEl.className = "status-text error";
+                
+                verifyBtn.textContent = "RETRY";
+                verifyBtn.disabled = false;
+                
+                setTimeout(() => {
+                    popupOverlay.classList.remove('show');
+                    cleanup();
+                    failCaptcha();
+                }, 2000);
+            }
+        });
+        
+        // Cleanup function
+        function cleanup() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+            if (detectionInterval) {
+                clearInterval(detectionInterval);
+                detectionInterval = null;
+            }
+        }
+        
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', cleanup);
+        
+        // Close popup when clicking outside
+        popupOverlay.addEventListener('click', (e) => {
+            if (e.target === popupOverlay) {
+                popupOverlay.classList.remove('show');
+                cleanup();
+                
+                // If not completed, mark as failed
+                if (!captchaCompleted) {
+                    failCaptcha();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
